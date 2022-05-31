@@ -12,6 +12,7 @@
                  [org.xerial/sqlite-jdbc "3.36.0.3"]
                  [aleph "0.5.0-rc2"]
                  [ring/ring-core "1.9.5"]
+                 [ring/ring-devel "1.9.5"]
                  [ring-logger "1.1.1"]
                  [metosin/reitit "0.5.18"]
                  [mount "0.1.16"]

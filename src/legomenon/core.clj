@@ -4,6 +4,7 @@
             [aleph.http :as http]
             [reitit.ring :as ring]
             [ring.logger :as logger]
+            [ring.middleware.reload :as ring-devel]
 
             [legomenon.fe :as fe]))
 
@@ -27,11 +28,11 @@
 
 
 (defn make-app []
-  (let [routes [["/" {:get {:handler fe/index}}]
-                ["/bye" {:get {:handler bye-handler}}]]]
+  (let [routes [["/" {:get {:handler fe/index}}]]]
     (-> (ring/router routes)
         (ring/ring-handler not-found)
-        (logger/wrap-with-logger))))
+        (logger/wrap-with-logger)
+        (ring-devel/wrap-reload))))
 
 
 (mount/defstate server
