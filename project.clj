@@ -14,6 +14,7 @@
                  [ring/ring-core "1.9.5"]
                  [ring-logger "1.1.1"]
                  [metosin/reitit "0.5.18"]
-                 [mount "0.1.16"]]
+                 [mount "0.1.16"]
+                 [hiccup "1.0.5"]]
   :main legomenon.core
   :repl-options {:init-ns legomenon.core})

@@ -1,10 +1,11 @@
 (ns legomenon.core
   (:require [clojure.tools.logging :as log]
-
             [mount.core :as mount]
             [aleph.http :as http]
             [reitit.ring :as ring]
-            [ring.logger :as logger]))
+            [ring.logger :as logger]
+
+            [legomenon.fe :as fe]))
 
 ;; TODO: move to config
 (def PORT 5000)
@@ -26,7 +27,7 @@
 
 
 (defn make-app []
-  (let [routes [["/hello" {:get {:handler handler}}]
+  (let [routes [["/" {:get {:handler fe/index}}]
                 ["/bye" {:get {:handler bye-handler}}]]]
     (-> (ring/router routes)
         (ring/ring-handler not-found)
