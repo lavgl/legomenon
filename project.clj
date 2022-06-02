@@ -10,6 +10,7 @@
                  [edu.stanford.nlp/stanford-corenlp "4.3.2" :classifier "models"]
                  [com.novemberain/pantomime "2.11.0"]
                  [org.xerial/sqlite-jdbc "3.36.0.3"]
+                 [com.github.seancorfield/honeysql "2.2.891"]
                  [aleph "0.5.0-rc2"]
                  [ring/ring-core "1.9.5"]
                  [ring/ring-devel "1.9.5"]

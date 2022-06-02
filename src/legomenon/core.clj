@@ -3,23 +3,16 @@
             [mount.core :as mount]
             [aleph.http :as http]
             [reitit.ring :as ring]
-            [ring.logger :as logger]
-            [ring.middleware.reload :as ring-devel]
+            [ring.logger :refer [wrap-with-logger]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
 
-            [legomenon.fe :as fe]))
+            [legomenon.fe :as fe]
+            [legomenon.api :as api]))
 
 ;; TODO: move to config
 (def PORT 5000)
-
-
-(defn handler [_req]
-  {:status 200
-   :body   "Hello World"})
-
-
-(defn bye-handler [_req]
-  {:status 200
-   :body "Bye"})
 
 
 (defn not-found [_]
@@ -28,11 +21,14 @@
 
 
 (defn make-app []
-  (let [routes [["/" {:get {:handler fe/index}}]]]
+  (let [routes [["/" {:get {:handler fe/index}}]
+                ["/books/add" {:post {:handler api/add-book}}]]]
     (-> (ring/router routes)
         (ring/ring-handler not-found)
-        (logger/wrap-with-logger)
-        (ring-devel/wrap-reload))))
+        (wrap-keyword-params)
+        (wrap-multipart-params)
+        (wrap-with-logger)
+        (wrap-reload))))
 
 
 (mount/defstate server
