@@ -3,6 +3,9 @@
             [honey.sql :as sql]))
 
 
+(def call sql/call)
+
+
 (def conn {:classname   "org.sqlite.JDBC"
            :subprotocol "sqlite"
            :subname     "resources/database.db"})

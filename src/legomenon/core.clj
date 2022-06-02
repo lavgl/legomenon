@@ -4,6 +4,7 @@
             [aleph.http :as http]
             [reitit.ring :as ring]
             [ring.logger :refer [wrap-with-logger]]
+            [ring.util.response :as response]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
@@ -15,16 +16,16 @@
 (def PORT 5000)
 
 
-(defn not-found [_]
-  {:status 404
-   :body "Not found"})
-
-
 (defn make-app []
-  (let [routes [["/" {:get {:handler fe/index}}]
-                ["/books/add" {:post {:handler api/add-book}}]]]
+  (let [routes  [["/" {:get {:handler fe/index}}]
+                 ["/books/:id/" {:get {:handler fe/book-page}}]
+
+                 ["/api/books/add/" {:post {:handler api/add-book}}]]
+        default (ring/routes
+                  (ring/redirect-trailing-slash-handler {:method :add})
+                  (ring/create-default-handler))]
     (-> (ring/router routes)
-        (ring/ring-handler not-found)
+        (ring/ring-handler default)
         (wrap-keyword-params)
         (wrap-multipart-params)
         (wrap-with-logger)
