@@ -19,5 +19,9 @@
   (jdbc/query db (query->args query)))
 
 
+(defn one [db query]
+  (first (q db query)))
+
+
 (defn execute [db query]
   (jdbc/execute! db (query->args query)))
