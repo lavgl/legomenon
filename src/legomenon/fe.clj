@@ -7,11 +7,12 @@
 (defn page [content]
   (hiccup.page/html5 {:encoding "UTF-8"}
     [:head {}
-     [:meta {:charset "UTF-8"}]]
-    [:body {}
-     content
-     (hiccup.page/include-js
-       "/public/js/htmx.min.js")]))
+     [:meta {:charset "UTF-8"}]
+     (hiccup.page/include-css "/public/css/main.css")]
+    [:body
+     [:div.content
+      content]
+     (hiccup.page/include-js "/public/js/htmx.min.js")]))
 
 
 ;; books list frontend
@@ -95,14 +96,14 @@
 
 (defn render-trash-row [{:keys [lemma count]}]
   [:tr.trash
-   [:td "trash"]
+   [:td]
    [:td count]
    [:td lemma]])
 
 
 (defn render-known-row [{:keys [lemma count]}]
   [:tr.known
-   [:td "known"]
+   [:td]
    [:td count]
    [:td lemma]])
 

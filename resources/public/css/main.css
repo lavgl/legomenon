@@ -1,0 +1,16 @@
+body {
+    background-color: #2B093D;
+    color: #C5B5D1;
+    font-size: 42px;
+    font-family: Sans-Serif;
+    display: flex;
+    justify-content: center;
+}
+
+.trash {
+    text-decoration: line-through;
+}
+
+.known {
+    color: green;
+}
