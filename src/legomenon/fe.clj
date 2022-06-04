@@ -1,6 +1,17 @@
 (ns legomenon.fe
   (:require [hiccup.core :refer [html]]
+            [hiccup.page :as hiccup.page]
             [legomenon.db :as db]))
+
+
+(defn page [content]
+  (hiccup.page/html5 {:encoding "UTF-8"}
+    [:head {}
+     [:meta {:charset "UTF-8"}]]
+    [:body {}
+     content
+     (hiccup.page/include-js
+       "/public/js/htmx.min.js")]))
 
 
 ;; books list frontend
@@ -33,7 +44,7 @@
 
 (defn index [& _]
   {:status 200
-   :body   (html [:div
+   :body   (page [:div
                   [:h1 "Hey, this is the header"]
                   (add-book-form)
                   (books-list)])})
@@ -42,38 +53,93 @@
 ;; book page frontend
 
 
-(defn book-q [book-id]
+;; TODO: sort trash and known words at the end
+(defn book-words-q [book-id]
   {:from   [:lemma_count]
-   :select [:lemma :count]
-   :where  [:= :book_id book-id]})
+   :select [:lemma :count :id]
+   :where  [:and
+            [:> :count 1]
+            [:= :book_id book-id]]})
 
 
-(defn lemmas-table [book-id]
-  (let [lemmas (db/q db/conn (book-q book-id))]
+;; TODO: optimize to not be calculated on every request
+(defn trash-words []
+  (->> (db/q db/conn {:select [:word]
+                      :from   [:trash_words]})
+       (map :word)
+       set))
+
+
+;; TODO: also optimize
+(defn known-words []
+  (->> (db/q db/conn {:select [:word]
+                      :from   [:known_words]})
+       (map :word)
+       set))
+
+
+(defn render-valuable-row [{:keys [lemma count id]}]
+  [:tr
+   [:td
+    [:button {:hx-delete (format "/api/words/%s/mark-as-trash/" id)
+              :hx-target "closest tr"
+              :hx-swap   "outerHTML"}
+     "Trash"]
+    [:button {:hx-put    (format "/api/words/%s/mark-as-known/" id)
+              :hx-target "closest tr"
+              :hx-swap   "outerHTML"}
+     "Known"]]
+   [:td count]
+   [:td lemma]])
+
+
+(defn render-trash-row [{:keys [lemma count]}]
+  [:tr.trash
+   [:td "trash"]
+   [:td count]
+   [:td lemma]])
+
+
+(defn render-known-row [{:keys [lemma count]}]
+  [:tr.known
+   [:td "known"]
+   [:td count]
+   [:td lemma]])
+
+
+(defn words-table [book-id]
+  (let [words       (db/q db/conn (book-words-q book-id))
+        trash-words (trash-words)
+        known-words (known-words)]
     [:table
-     [:tr [:th "Lemma"] [:th "Count"]]
-     (map (fn [{:keys [lemma count]}]
-             [:tr {:tabindex "0"} [:td lemma] [:td count]]) lemmas)]))
+     [:tr [:th "Actions"] [:th "Count"] [:th "Word"]]
+     (map (fn [word]
+            (cond
+              (contains? trash-words (:lemma word))
+              (render-trash-row word)
 
+              (contains? known-words (:lemma word))
+              (render-known-row word)
+
+              :else
+              (render-valuable-row word)))
+       words)]))
 
 
 (defn book-exists? [book-id]
-  (let [q {:select [1]
-           :where  [:exists {:select [1]
-                             :from   [:books]
-                             :where  [:= :id book-id]}]}]
-    (->> (db/q db/conn q)
-         not-empty
-         boolean)))
+  (db/exists? {:select [1]
+               :from   [:books]
+               :where  [:= :id book-id]}))
 
 
 (defn book-page [req]
   (let [book-id (-> req :path-params :id)]
     (if (book-exists? book-id)
       {:status 200
-       :body   (html [:div
-                      [:h1 "book title could be here"]
-                      (lemmas-table book-id)])}
+       :body   (html (page
+                       [:div
+                        [:h1 "book title could be here"]
+                        (words-table book-id)]))}
       {:status 404
        :body   "not found"})))
 

@@ -1,12 +1,14 @@
 (ns legomenon.api
-  (:require [clojure.core :exclude [number?]]
-            [clojure.java.io :as io]
+  (:refer-clojure :exclude [number?])
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [dk.simongray.datalinguist :as nlp]
             [pantomime.extract :as extract]
+            [hiccup.core :refer [html]]
 
             [legomenon.db :as db]
-            [legomenon.utils :as utils]))
+            [legomenon.utils :as utils]
+            [legomenon.fe :as fe]))
 
 
 ;; books text extraction
@@ -89,7 +91,7 @@
     (map map-fn lemmas-count)))
 
 
-;; api
+;; add book api
 
 
 (defn add-book [req]
@@ -106,3 +108,47 @@
     (catch Exception e
       {:status  301
        :headers {"Location" "/?message=book-duplicate"}})))
+
+
+;; mark word as trash api
+
+
+(defn word-q [word-id]
+  {:select [:id :lemma :count]
+   :from   [:lemma_count]
+   :where  [:= :id word-id]})
+
+
+(defn add-word-to-trash-list-q [word]
+  {:insert-or-ignore-into :trash_words
+   :values                [{:word word}]})
+
+
+(defn mark-word-as-trash [req]
+  (let [word-id (-> req :path-params :id)
+        word    (db/one db/conn (word-q word-id))]
+    (if (some? word)
+      (do
+        (db/execute db/conn (add-word-to-trash-list-q (:lemma word)))
+        {:status 200
+         :body   (html (fe/render-trash-row word))})
+      {:status 404})))
+
+
+;; mark work as known api
+
+
+(defn add-word-to-known-list-q [word]
+  {:insert-or-ignore-into :known_words
+   :values                [{:word word}]})
+
+
+(defn mark-word-as-known [req]
+  (let [word-id (-> req :path-params :id)
+        word    (db/one db/conn (word-q word-id))]
+    (if (some? word)
+      (do
+        (db/execute db/conn (add-word-to-known-list-q (:lemma word)))
+        {:status 200
+         :body   (html (fe/render-known-row word))})
+      {:status 404})))

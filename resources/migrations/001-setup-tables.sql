@@ -14,4 +14,14 @@ create table lemma_count (
   book_id text not null,
   lemma text not null,
   count integer not null
-)
+);
+
+
+create table trash_words (
+  word text primary key
+);
+
+
+create table known_words (
+  word text primary key
+);

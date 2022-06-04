@@ -17,10 +17,14 @@
 
 
 (defn make-app []
-  (let [routes  [["/" {:get {:handler fe/index}}]
-                 ["/books/:id/" {:get {:handler fe/book-page}}]
+  (let [routes [["/" {:get {:handler fe/index}}]
+                ["/books/:id/" {:get {:handler fe/book-page}}]
 
-                 ["/api/books/add/" {:post {:handler api/add-book}}]]
+                ["/api/books/add/" {:post {:handler api/add-book}}]
+                ["/api/words/:id/mark-as-trash/" {:delete {:handler api/mark-word-as-trash}}]
+                ["/api/words/:id/mark-as-known/" {:put {:handler api/mark-word-as-known}}]
+
+                ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes
                   (ring/redirect-trailing-slash-handler {:method :add})
                   (ring/create-default-handler))]

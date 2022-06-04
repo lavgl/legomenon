@@ -6,6 +6,16 @@
 (def call sql/call)
 
 
+(defn- insert-or-ignore-into-formatter [clause table]
+  [(str (sql/sql-kw clause) " " (sql/format-entity table))])
+
+
+(sql/register-clause!
+  :insert-or-ignore-into
+  insert-or-ignore-into-formatter
+  :insert-into)
+
+
 (def conn {:classname   "org.sqlite.JDBC"
            :subprotocol "sqlite"
            :subname     "resources/database.db"})
@@ -28,3 +38,9 @@
 
 (defn execute [db query]
   (jdbc/execute! db (query->args query)))
+
+
+(defn exists? [subq]
+  (let [q {:select [1]
+           :where  [:exists subq]}]
+    (some? (one conn q))))
