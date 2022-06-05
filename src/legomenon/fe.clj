@@ -69,8 +69,12 @@ htmx.onLoad(element => {
                        [:!= :known.word nil] 1
                        :else 0]]
     {:from      [:lemma_count]
-     :left-join [[:trash_words :trash] [:= :trash.word :lemma_count.lemma]
-                 [:known_words :known] [:= :known.word :lemma_count.lemma]]
+     :left-join [[:trash_words :trash] [:and
+                                        [:= :trash.word :lemma_count.lemma]
+                                        [:= :trash.deleted_at nil]]
+                 [:known_words :known] [:and
+                                        [:= :known.word :lemma_count.lemma]
+                                        [:= :known.deleted_at nil]]]
      :select    [:lemma :count :id
                  [is-trash-subq :is_trash]
                  [is-known-subq :is_known]]
@@ -85,24 +89,29 @@ htmx.onLoad(element => {
 (defn render-valuable-row [{:keys [lemma count id]}]
   [:tr {:tabindex   "0"
         :hx-trigger "keyup[key=='k' || key == 't']"
-        :hx-post    "/api/words/mark/"
+        :hx-post    "/api/words/op/"
         :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
         :hx-swap    "outerHTML"}
-   [:td]
    [:td lemma]
    [:td count]])
 
 
-(defn render-trash-row [{:keys [lemma count]}]
-  [:tr.trash
-   [:td]
+(defn render-trash-row [{:keys [lemma count id]}]
+  [:tr.trash {:tabindex   "0"
+              :hx-trigger "keyup[key == 'u']"
+              :hx-post    "/api/words/op/"
+              :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
+              :hx-swap    "outerHTML"}
    [:td lemma]
    [:td count]])
 
 
-(defn render-known-row [{:keys [lemma count]}]
-  [:tr.known
-   [:td]
+(defn render-known-row [{:keys [lemma count id]}]
+  [:tr.known {:tabindex   "0"
+              :hx-trigger "keyup[key == 'u']"
+              :hx-post    "/api/words/op/"
+              :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
+              :hx-swap    "outerHTML"}
    [:td lemma]
    [:td count]])
 
@@ -110,7 +119,7 @@ htmx.onLoad(element => {
 (defn words-table [book-id]
   (let [words (db/q db/conn (book-words-q book-id))]
     [:table
-     [:tr [:th "Actions"] [:th "Word"] [:th "Count"]]
+     [:tr [:th "Word"] [:th "Count"]]
      (map (fn [word]
             (cond
               (pos? (:is_known word))

@@ -18,10 +18,12 @@ create table lemma_count (
 
 
 create table trash_words (
-  word text primary key
+  word text primary key,
+  deleted_at integer
 );
 
 
 create table known_words (
-  word text primary key
+  word text primary key,
+  deleted_at integer
 );

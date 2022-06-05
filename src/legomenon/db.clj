@@ -7,13 +7,19 @@
 (def fmt sql/format)
 
 
-(defn- insert-or-ignore-into-formatter [clause table]
+(defn- insert-or-*-into-formatter [clause table]
   [(str (sql/sql-kw clause) " " (sql/format-entity table))])
 
 
 (sql/register-clause!
   :insert-or-ignore-into
-  insert-or-ignore-into-formatter
+  insert-or-*-into-formatter
+  :insert-into)
+
+
+(sql/register-clause!
+  :insert-or-replace-into
+  insert-or-*-into-formatter
   :insert-into)
 
 

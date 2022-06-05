@@ -120,16 +120,30 @@
 
 
 (defn add-word-to-trash-list-q [word]
-  {:insert-or-ignore-into :trash_words
-   :values                [{:word word}]})
+  {:insert-or-replace-into :trash_words
+   :values                 [{:word       word
+                             :deleted_at nil}]})
 
 
 (defn add-word-to-known-list-q [word]
-  {:insert-or-ignore-into :known_words
-   :values                [{:word word}]})
+  {:insert-or-replace-into :known_words
+   :values                 [{:word       word
+                             :deleted_at nil}]})
 
 
-(defn mark-word [req]
+(defn remove-word-from-trash-list-q [word]
+  {:update :trash_words
+   :set    {:deleted_at :current_timestamp}
+   :where  [:= :word word]})
+
+
+(defn remove-word-from-known-list-q [word]
+  {:update :known_words
+   :set    {:deleted_at :current_timestamp}
+   :where  [:= :word word]})
+
+
+(defn operate-on-word [req]
   (let [key     (-> req :params :key)
         word-id (-> req :params :id)
         ;; TODO: move to deps.edn and use blet
@@ -147,6 +161,13 @@
 
         {:status 200
          :body   (html (fe/render-trash-row word))})
+
+      (and (some? word) (= key "u"))
+      (do
+        (db/execute db/conn (remove-word-from-known-list-q (:lemma word)))
+        (db/execute db/conn (remove-word-from-trash-list-q (:lemma word)))
+        {:status 200
+         :body   (html (fe/render-valuable-row word))})
 
       :else
       {:status 400 :body "error"})))

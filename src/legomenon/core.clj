@@ -22,7 +22,7 @@
                 ["/books/:id/" {:get {:handler fe/book-page}}]
 
                 ["/api/books/add/" {:post {:handler api/add-book}}]
-                ["/api/words/mark/" {:post {:handler api/mark-word}}]
+                ["/api/words/op/" {:post {:handler api/operate-on-word}}]
 
                 ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes
