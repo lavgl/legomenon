@@ -4,6 +4,7 @@
 
 
 (def call sql/call)
+(def fmt sql/format)
 
 
 (defn- insert-or-ignore-into-formatter [clause table]

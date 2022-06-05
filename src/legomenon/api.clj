@@ -110,7 +110,7 @@
        :headers {"Location" "/?message=book-duplicate"}})))
 
 
-;; mark word as trash api
+;; mark word as known/trash api
 
 
 (defn word-q [word-id]
@@ -124,31 +124,29 @@
    :values                [{:word word}]})
 
 
-(defn mark-word-as-trash [req]
-  (let [word-id (-> req :path-params :id)
-        word    (db/one db/conn (word-q word-id))]
-    (if (some? word)
-      (do
-        (db/execute db/conn (add-word-to-trash-list-q (:lemma word)))
-        {:status 200
-         :body   (html (fe/render-trash-row word))})
-      {:status 404})))
-
-
-;; mark work as known api
-
-
 (defn add-word-to-known-list-q [word]
   {:insert-or-ignore-into :known_words
    :values                [{:word word}]})
 
 
-(defn mark-word-as-known [req]
-  (let [word-id (-> req :path-params :id)
+(defn mark-word [req]
+  (let [key     (-> req :params :key)
+        word-id (-> req :params :id)
+        ;; TODO: move to deps.edn and use blet
         word    (db/one db/conn (word-q word-id))]
-    (if (some? word)
+    (cond
+      (and (some? word) (= key "k"))
       (do
         (db/execute db/conn (add-word-to-known-list-q (:lemma word)))
         {:status 200
          :body   (html (fe/render-known-row word))})
-      {:status 404})))
+
+      (and (some? word) (= key "t"))
+      (do
+        (db/execute db/conn (add-word-to-trash-list-q (:lemma word)))
+
+        {:status 200
+         :body   (html (fe/render-trash-row word))})
+
+      :else
+      {:status 400 :body "error"})))

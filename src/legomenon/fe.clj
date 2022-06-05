@@ -12,7 +12,13 @@
     [:body
      [:div.content
       content]
-     (hiccup.page/include-js "/public/js/htmx.min.js")]))
+     (hiccup.page/include-js "/public/js/htmx.min.js")
+     [:script
+      "
+htmx.onLoad(element => {
+  if (element.tagName == 'TR' && element.nextSibling.tagName == 'TR') {
+    element.nextSibling.focus();
+  }});"]]))
 
 
 ;; books list frontend
@@ -54,73 +60,64 @@
 ;; book page frontend
 
 
-;; TODO: sort trash and known words at the end
+
 (defn book-words-q [book-id]
-  {:from   [:lemma_count]
-   :select [:lemma :count :id]
-   :where  [:and
-            [:> :count 1]
-            [:= :book_id book-id]]})
-
-
-;; TODO: optimize to not be calculated on every request
-(defn trash-words []
-  (->> (db/q db/conn {:select [:word]
-                      :from   [:trash_words]})
-       (map :word)
-       set))
-
-
-;; TODO: also optimize
-(defn known-words []
-  (->> (db/q db/conn {:select [:word]
-                      :from   [:known_words]})
-       (map :word)
-       set))
+  (let [is-trash-subq [:case
+                       [:!= :trash.word nil] 1
+                       :else 0]
+        is-known-subq [:case
+                       [:!= :known.word nil] 1
+                       :else 0]]
+    {:from      [:lemma_count]
+     :left-join [[:trash_words :trash] [:= :trash.word :lemma_count.lemma]
+                 [:known_words :known] [:= :known.word :lemma_count.lemma]]
+     :select    [:lemma :count :id
+                 [is-trash-subq :is_trash]
+                 [is-known-subq :is_known]]
+     :where     [:and
+                 [:= :lemma_count.book_id book-id]
+                 [:> :lemma_count.count 1]]
+     :order-by  [[:is_trash :asc]
+                 [:is_known :asc]
+                 [:count :desc]]}))
 
 
 (defn render-valuable-row [{:keys [lemma count id]}]
-  [:tr
-   [:td
-    [:button {:hx-delete (format "/api/words/%s/mark-as-trash/" id)
-              :hx-target "closest tr"
-              :hx-swap   "outerHTML"}
-     "Trash"]
-    [:button {:hx-put    (format "/api/words/%s/mark-as-known/" id)
-              :hx-target "closest tr"
-              :hx-swap   "outerHTML"}
-     "Known"]]
-   [:td count]
-   [:td lemma]])
+  [:tr {:tabindex   "0"
+        :hx-trigger "keyup[key=='k' || key == 't']"
+        :hx-post    "/api/words/mark/"
+        :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
+        :hx-swap    "outerHTML"}
+   [:td]
+   [:td lemma]
+   [:td count]])
 
 
 (defn render-trash-row [{:keys [lemma count]}]
   [:tr.trash
    [:td]
-   [:td count]
-   [:td lemma]])
+   [:td lemma]
+   [:td count]])
 
 
 (defn render-known-row [{:keys [lemma count]}]
   [:tr.known
    [:td]
-   [:td count]
-   [:td lemma]])
+   [:td lemma]
+   [:td count]])
 
 
 (defn words-table [book-id]
-  (let [words       (db/q db/conn (book-words-q book-id))
-        trash-words (trash-words)
-        known-words (known-words)]
+  (let [words (db/q db/conn (book-words-q book-id))]
     [:table
-     [:tr [:th "Actions"] [:th "Count"] [:th "Word"]]
+     [:tr [:th "Actions"] [:th "Word"] [:th "Count"]]
      (map (fn [word]
             (cond
-              (contains? trash-words (:lemma word))
-              (render-trash-row word)
-
-              (contains? known-words (:lemma word))
+              (pos? (:is_known word))
               (render-known-row word)
+
+              (pos? (:is_trash word))
+              (render-trash-row word)
 
               :else
               (render-valuable-row word)))

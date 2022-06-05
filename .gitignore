@@ -12,4 +12,4 @@ pom.xml.asc
 .hgignore
 .hg/
 .clj-kondo/.cache
-resources/database.db
+resources/database.db*

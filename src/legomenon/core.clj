@@ -6,6 +6,7 @@
             [ring.logger :refer [wrap-with-logger]]
             [ring.util.response :as response]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
 
@@ -21,8 +22,7 @@
                 ["/books/:id/" {:get {:handler fe/book-page}}]
 
                 ["/api/books/add/" {:post {:handler api/add-book}}]
-                ["/api/words/:id/mark-as-trash/" {:delete {:handler api/mark-word-as-trash}}]
-                ["/api/words/:id/mark-as-known/" {:put {:handler api/mark-word-as-known}}]
+                ["/api/words/mark/" {:post {:handler api/mark-word}}]
 
                 ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes
@@ -31,6 +31,7 @@
     (-> (ring/router routes)
         (ring/ring-handler default)
         (wrap-keyword-params)
+        (wrap-params)
         (wrap-multipart-params)
         (wrap-with-logger)
         (wrap-reload))))
