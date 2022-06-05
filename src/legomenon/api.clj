@@ -171,3 +171,25 @@
 
       :else
       {:status 400 :body "error"})))
+
+
+;; edit book title api
+
+
+(defn update-book-title-q [book-id title]
+  {:update :books
+   :set    {:user_entered_title title}
+   :where  [:= :id book-id]})
+
+
+(defn edit-book-title [req]
+  (let [book-id (-> req :path-params :book-id)
+        title   (-> req :params :title str/trim not-empty)]
+    (if-not (empty? title)
+      (do
+        (db/execute db/conn (update-book-title-q book-id title))
+        (println "saving title to db...")
+        {:status 200
+         :body   (html (fe/book-title {:book-id book-id
+                                       :title   title}))}))))
+

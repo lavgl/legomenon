@@ -21,7 +21,10 @@
   (let [routes [["/" {:get {:handler fe/index}}]
                 ["/books/:id/" {:get {:handler fe/book-page}}]
 
+                ["/fragments/edit-book-title/" {:get {:handler fe/edit-book-title-fragment}}]
+
                 ["/api/books/add/" {:post {:handler api/add-book}}]
+                ["/api/books/:book-id/title/edit/" {:put {:handler api/edit-book-title}}]
                 ["/api/words/op/" {:post {:handler api/operate-on-word}}]
 
                 ["/public/*" (ring/create-resource-handler)]]

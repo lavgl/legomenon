@@ -34,14 +34,15 @@ htmx.onLoad(element => {
 
 
 (defn books-q []
-  {:select [:filename :id]
+  {:select [:id
+            [[:coalesce :user_entered_title :filename] :title]]
    :from   [:books]
    :where  [:= nil :deleted_at]})
 
 
-(defn render-book [{:keys [filename id]}]
+(defn render-book [{:keys [title id]}]
   [:div {}
-   [:a {:href (format "/books/%s/" id)} filename]])
+   [:a {:href (format "/books/%s/" id)} title]])
 
 
 (defn books-list []
@@ -133,19 +134,38 @@ htmx.onLoad(element => {
        words)]))
 
 
-(defn book-exists? [book-id]
-  (db/exists? {:select [1]
-               :from   [:books]
-               :where  [:= :id book-id]}))
+(defn book-title-q [book-id]
+  {:from   [:books]
+   :select [[:user_entered_title :title]
+            [true :is_book_exists]]
+   :where  [:= :id book-id]})
+
+
+(defn edit-book-title-fragment [req]
+  (let [book-id (-> req :params :book-id)
+        title   (-> req :params :title)]
+    {:status 200
+     :body   (html
+               [:form {:hx-put (format "/api/books/%s/title/edit/" book-id)}
+                [:input.book-title-input {:name "title" :value title}]
+                [:button {:type "submit"} "OK"]])}))
+
+
+(defn book-title [{:keys [book-id title]}]
+  [:h1 {:hx-get  (format "/fragments/edit-book-title/?book-id=%s&title=%s" book-id title)
+        :hx-swap "outerHTML"}
+   (or title "click to enter title")])
 
 
 (defn book-page [req]
-  (let [book-id (-> req :path-params :id)]
-    (if (book-exists? book-id)
+  (let [book-id                        (-> req :path-params :id)
+        {:keys [title is_book_exists]} (db/one db/conn (book-title-q book-id))]
+    (if (pos? is_book_exists)
       {:status 200
        :body   (html (page
                        [:div
-                        [:h1 "book title could be here"]
+                        (book-title {:book-id book-id
+                                     :title   title})
                         (words-table book-id)]))}
       {:status 404
        :body   "not found"})))
