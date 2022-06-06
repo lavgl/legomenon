@@ -58,8 +58,7 @@ htmx.onLoad(element => {
                   (books-list)])})
 
 
-;; book page frontend
-
+;; book dictionary page frontend
 
 
 (defn book-words-q [book-id]
@@ -147,7 +146,7 @@ htmx.onLoad(element => {
     {:status 200
      :body   (html
                [:form {:hx-put (format "/api/books/%s/title/edit/" book-id)}
-                [:input.book-title-input {:name "title" :value title}]
+                [:input.book-title-input {:name "title" :value (or title "")}]
                 [:button {:type "submit"} "OK"]])}))
 
 
@@ -157,7 +156,7 @@ htmx.onLoad(element => {
    (or title "click to enter title")])
 
 
-(defn book-page [req]
+(defn book-dictionary-page [req]
   (let [book-id                        (-> req :path-params :id)
         {:keys [title is_book_exists]} (db/one db/conn (book-title-q book-id))]
     (if (pos? is_book_exists)
@@ -167,6 +166,32 @@ htmx.onLoad(element => {
                         (book-title {:book-id book-id
                                      :title   title})
                         (words-table book-id)]))}
+      {:status 404
+       :body   "not found"})))
+
+
+;; book text page frontend
+
+
+(defn book-text [book-id]
+  (let [text (:text (db/one db/conn {:from   [:books]
+                                     :select [:text]
+                                     :where  [:and
+                                              [:= :id book-id]
+                                              [:= :deleted_at nil]]}))]
+    [:div.book-text {} text]))
+
+
+(defn book-text-page [req]
+  (let [book-id                        (-> req :path-params :id)
+        {:keys [title is_book_exists]} (db/one db/conn (book-title-q book-id))]
+    (if (pos? is_book_exists)
+      {:status 200
+       :body   (html (page
+                       [:div
+                        (book-title {:book-id book-id
+                                     :title   title})
+                        (book-text book-id)]))}
       {:status 404
        :body   "not found"})))
 

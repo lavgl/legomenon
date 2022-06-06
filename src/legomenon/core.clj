@@ -19,7 +19,8 @@
 
 (defn make-app []
   (let [routes [["/" {:get {:handler fe/index}}]
-                ["/books/:id/" {:get {:handler fe/book-page}}]
+                ["/books/:id/" {:get {:handler fe/book-dictionary-page}}]
+                ["/books/:id/text/" {:get {:handler fe/book-text-page}}]
 
                 ["/fragments/edit-book-title/" {:get {:handler fe/edit-book-title-fragment}}]
 

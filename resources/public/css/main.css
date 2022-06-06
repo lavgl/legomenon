@@ -14,3 +14,7 @@ body {
 .known {
     color: green;
 }
+
+.book-text {
+    white-space: pre-wrap;
+}
