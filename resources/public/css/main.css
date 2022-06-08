@@ -1,7 +1,7 @@
 body {
     background-color: #2B093D;
     color: #C5B5D1;
-    font-size: 42px;
+    font-size: 21px;
     font-family: Sans-Serif;
     display: flex;
     justify-content: center;
@@ -16,5 +16,9 @@ body {
 }
 
 .book-text {
-    white-space: pre-wrap;
+    white-space: pre-line;
+}
+
+.dict-word {
+    font-size: 30px;
 }
