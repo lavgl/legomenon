@@ -16,7 +16,9 @@
        "/public/css/main.css"
        )]
     [:body
-     (or header nil)
+     (when header
+       [:div.header-divider
+        header])
      [:div.container
       content]
      (hiccup.page/include-js
@@ -30,9 +32,27 @@ htmx.onLoad(element => {
   }});"]]))
 
 
-;; (defn navbar []
-;;   [:nav ]
-;;   )
+(defn navbar [req]
+  (let [page     (-> req :reitit.core/match :data :get :page)
+        back-btn (case page
+                   (:add-book :book-dict) [:a.nav-link {:href "/"} "Go back"]
+                   [:a.nav-link "Legomenon"])]
+    [:nav.navbar.navbar-dark.navbar-expand-lg
+     [:div.container-fluid
+      back-btn
+      [:button.navbar-toggler {:type           "button"
+                               :data-bs-toggle "collapse"
+                               :data-bs-target "#navbarNav"
+                               :aria-controls  "navbarNav"
+                               :aria-expanded  "false"
+                               :aria-label     "Toggle navigation"}
+       [:span.navbar-toggler-icon]]
+      [:div#navbarNav.collapse.navbar-collapse
+       [:div.navbar-nav
+        [:a.nav-link {:href  "/"
+                      :class (when (= page :books-list) "active")} "Books List"]
+        [:a.nav-link {:href  "/books/add/"
+                      :class (when (= page :add-book) "active")} "Add Book"]]]]]))
 
 
 ;; books list frontend
@@ -64,9 +84,10 @@ htmx.onLoad(element => {
     [:div {} (map render-book books)]))
 
 
-(defn index [& _]
+(defn index [req]
   {:status 200
-   :body   (page nil
+   :body   (page
+             (navbar req)
              [:div
               [:h4 "Add new book:"]
               (add-book-form)
@@ -189,7 +210,8 @@ htmx.onLoad(element => {
         {:keys [title is_book_exists]} (db/one db/conn (book-title-q book-id))]
     (if (pos? is_book_exists)
       {:status 200
-       :body   (html (page nil
+       :body   (html (page
+                       (navbar req)
                        (book-title {:book-id book-id
                                     :title   title})
                        (words-table book-id)))}
@@ -222,3 +244,11 @@ htmx.onLoad(element => {
       {:status 404
        :body   "not found"})))
 
+
+
+;; add book page fe
+
+
+(defn add-book-page [req]
+  {:status 200
+   :body   "ok"})

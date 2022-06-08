@@ -3,8 +3,6 @@ body {
     color: #C5B5D1;
     font-size: 21px;
     font-family: Sans-Serif;
-    display: flex;
-    justify-content: center;
 }
 
 .trash {
@@ -21,4 +19,9 @@ body {
 
 .dict-word {
     font-size: 30px;
+}
+
+.header-divider {
+    border-bottom: 1px solid grey;
+    margin-bottom: 10px;
 }
