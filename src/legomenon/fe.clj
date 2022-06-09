@@ -1,31 +1,33 @@
 (ns legomenon.fe
-  (:require [hiccup.core :refer [html]]
+  (:require [clojure.string :as str]
+            [hiccup.core :refer [html]]
             [hiccup.page :as hiccup.page]
-            [legomenon.db :as db]))
+
+            [legomenon.db :as db]
+            [legomenon.utils :as utils]))
 
 
 (defn page [header & content]
   (hiccup.page/html5 {:encoding "UTF-8"}
-    [:head {}
-     [:meta {:charset "UTF-8"}]
-     [:meta {:name    "viewport"
-             :content "width=device-width, initial-scale=1"}]
-     (hiccup.page/include-css
+                     [:head {}
+                      [:meta {:charset "UTF-8"}]
+                      [:meta {:name    "viewport"
+                              :content "width=device-width, initial-scale=1"}]
+                      (hiccup.page/include-css
        ;; "/public/css/normalize.css"
-       "/public/css/bootstrap.min.css"
-       "/public/css/main.css"
-       )]
-    [:body
-     (when header
-       [:div.header-divider
-        header])
-     [:div.container
-      content]
-     (hiccup.page/include-js
-       "/public/js/htmx.min.js"
-       "/public/js/bootstrap.bundle.min.js")
-     [:script
-      "
+                       "/public/css/bootstrap.min.css"
+                       "/public/css/main.css")]
+                     [:body
+                      (when header
+                        [:div.header-divider
+                         header])
+                      [:div.container
+                       content]
+                      (hiccup.page/include-js
+                       "/public/js/htmx.min.js"
+                       "/public/js/bootstrap.bundle.min.js")
+                      [:script
+                       "
 htmx.onLoad(element => {
   if (element.tagName == 'TR' && element.nextSibling.tagName == 'TR') {
     element.nextSibling.focus();
@@ -93,74 +95,54 @@ htmx.onLoad(element => {
 (defn index [req]
   {:status 200
    :body   (page
-             (navbar req)
-             [:div
-              [:h4 "Add new book:"]
-              (add-book-form)
-              [:hr]
-              [:h4 "My books:"]
-              (books-list)])})
+            (navbar req)
+            [:div
+             [:h4 "Add new book:"]
+             (add-book-form)
+             [:hr]
+             [:h4 "My books:"]
+             (books-list)])})
 
 
 ;; book dictionary page frontend
 
 
 (defn book-words-q [book-id]
-  (let [is-trash-subq [:case
-                       [:!= :trash.word nil] 1
-                       :else 0]
-        is-known-subq [:case
-                       [:!= :known.word nil] 1
-                       :else 0]]
-    {:from      [:lemma_count]
-     :left-join [[:trash_words :trash] [:and
-                                        [:= :trash.word :lemma_count.lemma]
-                                        [:= :trash.deleted_at nil]]
-                 [:known_words :known] [:and
-                                        [:= :known.word :lemma_count.lemma]
-                                        [:= :known.deleted_at nil]]]
-     :select    [:lemma :count :id
-                 [is-trash-subq :is_trash]
-                 [is-known-subq :is_known]]
-     :where     [:and
-                 [:= :lemma_count.book_id book-id]
-                 [:> :lemma_count.count 1]]
-     :order-by  [[:is_trash :asc]
-                 [:is_known :asc]
-                 [:count :desc]]}))
+  {:from      [:lemma_count]
+   :left-join [:my_words [:and
+                          [:= :my_words.word :lemma_count.lemma]
+                          [:= :my_words.deleted_at nil]]]
+   :select    [:lemma :count :id :my_words.list]
+   :where     [:and
+               [:= :lemma_count.book_id book-id]
+               [:> :lemma_count.count 1]]
+   :order-by  [
+               [[:= :list "trash"]]
+               [[:= :list "known"]]
+               [:count :desc]]})
 
 
-(defn render-valuable-row [{:keys [lemma count id]}]
-  [:tr.dict-word
-   {:tabindex   "0"
-    :hx-trigger "keyup[key=='k' || key == 't']"
-    :hx-post    "/api/words/op/"
-    :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
-    :hx-swap    "outerHTML"}
-   [:td lemma]
-   [:td count]])
+(defn render-row [{:keys [keys-allowed list]}
+                  {:keys [lemma count id]}]
+  (assert keys-allowed)
+  (let [hx-trigger (->> keys-allowed
+                        (map #(format "key=='%s'" %))
+                        (str/join " || ")
+                        (format "keyup[%s]"))]
+    [:tr
+     {:class      (str "dict-word " list)
+      :tabindex   "0"
+      :hx-trigger hx-trigger
+      :hx-post    "/api/words/op/"
+      :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
+      :hx-swap    "outerHTML"}
+     [:td lemma]
+     [:td count]]))
 
 
-(defn render-trash-row [{:keys [lemma count id]}]
-  [:tr.trash.dict-word
-   {:tabindex   "0"
-    :hx-trigger "keyup[key == 'u']"
-    :hx-post    "/api/words/op/"
-    :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
-    :hx-swap    "outerHTML"}
-   [:td lemma]
-   [:td count]])
-
-
-(defn render-known-row [{:keys [lemma count id]}]
-  [:tr.known.dict-word
-   {:tabindex   "0"
-    :hx-trigger "keyup[key == 'u']"
-    :hx-post    "/api/words/op/"
-    :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
-    :hx-swap    "outerHTML"}
-   [:td lemma]
-   [:td count]])
+(def render-known-row (partial render-row {:list "known" :keys-allowed ["u" "t"]}))
+(def render-trash-row (partial render-row {:list "trash" :keys-allowed ["u" "k"]}))
+(def render-plain-row (partial render-row {:keys-allowed ["k" "t"]}))
 
 
 (defn words-table [book-id]
@@ -173,18 +155,16 @@ htmx.onLoad(element => {
         [:tr.dict-word [:th "Word"] [:th "Count"]]]
        [:tbody
         (map (fn [word]
-               (cond
-                 (pos? (:is_known word))
+               (case (:list word)
+                 "known"
                  (render-known-row word)
 
-                 (pos? (:is_trash word))
+                 "trash"
                  (render-trash-row word)
 
-                 :else
-                 (render-valuable-row word)))
-          words)]]]
+                 (render-plain-row word)))
+             words)]]]
      [:div.col]]))
-
 
 (defn book-title-q [book-id]
   {:from   [:books]
@@ -210,17 +190,16 @@ htmx.onLoad(element => {
     [:h1 title]]
    [:div.col]])
 
-
 (defn book-dictionary-page [req]
   (let [book-id                        (-> req :path-params :id)
         {:keys [title is_book_exists]} (db/one db/conn (book-title-q book-id))]
     (if (pos? is_book_exists)
       {:status 200
        :body   (html (page
-                       (navbar req)
-                       (book-title {:book-id book-id
-                                    :title   title})
-                       (words-table book-id)))}
+                      (navbar req)
+                      (book-title {:book-id book-id
+                                   :title   title})
+                      (words-table book-id)))}
       {:status 404
        :body   "not found"})))
 
@@ -236,17 +215,16 @@ htmx.onLoad(element => {
                                               [:= :deleted_at nil]]}))]
     [:div.container.book-text {} text]))
 
-
 (defn book-text-page [req]
   (let [book-id                        (-> req :path-params :id)
         {:keys [title is_book_exists]} (db/one db/conn (book-title-q book-id))]
     (if (pos? is_book_exists)
       {:status 200
        :body   (html (page nil
-                       [:div
-                        (book-title {:book-id book-id
-                                     :title   title})
-                        (book-text book-id)]))}
+                           [:div
+                            (book-title {:book-id book-id
+                                         :title   title})
+                            (book-text book-id)]))}
       {:status 404
        :body   "not found"})))
 

@@ -119,27 +119,18 @@
    :where  [:= :id word-id]})
 
 
-(defn add-word-to-trash-list-q [word]
-  {:insert-or-replace-into :trash_words
+(defn add-word-to-list-q [list word]
+  (assert list)
+  {:insert-or-replace-into :my_words
    :values                 [{:word       word
+                             :list       (name list)
                              :deleted_at nil}]})
 
 
-(defn add-word-to-known-list-q [word]
-  {:insert-or-replace-into :known_words
-   :values                 [{:word       word
-                             :deleted_at nil}]})
-
-
-(defn remove-word-from-trash-list-q [word]
-  {:update :trash_words
-   :set    {:deleted_at :current_timestamp}
-   :where  [:= :word word]})
-
-
-(defn remove-word-from-known-list-q [word]
-  {:update :known_words
-   :set    {:deleted_at :current_timestamp}
+(defn remove-word-from-lists-q [word]
+  {:update :my_words
+   :set    {:deleted_at :current_timestamp
+            :list       nil}
    :where  [:= :word word]})
 
 
@@ -151,23 +142,22 @@
     (cond
       (and (some? word) (= key "k"))
       (do
-        (db/execute db/conn (add-word-to-known-list-q (:lemma word)))
+        (db/execute db/conn (add-word-to-list-q :known (:lemma word)))
         {:status 200
          :body   (html (fe/render-known-row word))})
 
       (and (some? word) (= key "t"))
       (do
-        (db/execute db/conn (add-word-to-trash-list-q (:lemma word)))
+        (db/execute db/conn (add-word-to-list-q :trash (:lemma word)))
 
         {:status 200
          :body   (html (fe/render-trash-row word))})
 
       (and (some? word) (= key "u"))
       (do
-        (db/execute db/conn (remove-word-from-known-list-q (:lemma word)))
-        (db/execute db/conn (remove-word-from-trash-list-q (:lemma word)))
+        (db/execute db/conn (remove-word-from-lists-q (:lemma word)))
         {:status 200
-         :body   (html (fe/render-valuable-row word))})
+         :body   (html (fe/render-plain-row word))})
 
       :else
       {:status 400 :body "error"})))

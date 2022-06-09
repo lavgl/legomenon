@@ -17,13 +17,8 @@ create table lemma_count (
 );
 
 
-create table trash_words (
+create table my_words (
   word text primary key,
-  deleted_at integer
-);
-
-
-create table known_words (
-  word text primary key,
+  list text,
   deleted_at integer
 );
