@@ -33,10 +33,14 @@ htmx.onLoad(element => {
 
 
 (defn navbar [req]
-  (let [page     (-> req :reitit.core/match :data :get :page)
-        back-btn (case page
-                   (:add-book :book-dict) [:a.nav-link {:href "/"} "Go back"]
-                   [:a.nav-link "Legomenon"])]
+  (let [page          (-> req :reitit.core/match :data :get :page)
+        back-btn      (case page
+                        (:add-book :book-dict) [:a.nav-link {:href "/"} "Go back"]
+                        [:a.nav-link "Legomenon"])
+        book-text-btn (case page
+                        :book-dict (let [book-id (-> req :path-params :id)]
+                                     [:a.nav-link {:href (format "/books/%s/text/" book-id)} "This Book Text"])
+                        nil)]
     [:nav.navbar.navbar-dark.navbar-expand-lg
      [:div.container-fluid
       back-btn
@@ -52,7 +56,8 @@ htmx.onLoad(element => {
         [:a.nav-link {:href  "/"
                       :class (when (= page :books-list) "active")} "Books List"]
         [:a.nav-link {:href  "/books/add/"
-                      :class (when (= page :add-book) "active")} "Add Book"]]]]]))
+                      :class (when (= page :add-book) "active")} "Add Book"]
+        book-text-btn]]]]))
 
 
 ;; books list frontend
@@ -76,7 +81,8 @@ htmx.onLoad(element => {
 
 (defn render-book [{:keys [title id]}]
   [:div {}
-   [:a {:href (format "/books/%s/" id)} title]])
+   [:a {:href (format "/books/%s/" id)} title]
+   " (" [:a {:href (format "/books/%s/text/" id)} "text"] ")"])
 
 
 (defn books-list []
@@ -187,21 +193,21 @@ htmx.onLoad(element => {
    :where  [:= :id book-id]})
 
 
-(defn edit-book-title-fragment [req]
-  (let [book-id (-> req :params :book-id)
-        title   (-> req :params :title)]
-    {:status 200
-     :body   (html
-               [:form {:hx-put (format "/api/books/%s/title/edit/" book-id)}
-                [:input.book-title-input {:name "title" :value (or title "")}]
-                [:button {:type "submit"} "OK"]])}))
+;; (defn edit-book-title-fragment [req]
+;;   (let [book-id (-> req :params :book-id)
+;;         title   (-> req :params :title)]
+;;     {:status 200
+;;      :body   (html
+;;                [:form {:hx-put (format "/api/books/%s/title/edit/" book-id)}
+;;                 [:input.book-title-input {:name "title" :value (or title "")}]
+;;                 [:button {:type "submit"} "OK"]])}))
 
 
 (defn book-title [{:keys [_book-id title]}]
   [:div.row
    [:div.col]
    [:div.col-sm-9
-    [:h1 (or title "click to enter title")]]
+    [:h1 title]]
    [:div.col]])
 
 

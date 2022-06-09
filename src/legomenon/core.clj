@@ -33,7 +33,7 @@
                 ["/books/:id/text/" {:get  {:handler fe/book-text-page}
                                      :page :book-text}]
 
-                ["/fragments/edit-book-title/" {:get {:handler fe/edit-book-title-fragment}}]
+                ;; ["/fragments/edit-book-title/" {:get {:handler fe/edit-book-title-fragment}}]
 
                 ["/api/books/add/" {:post {:handler api/add-book}}]
                 ["/api/books/:book-id/title/edit/" {:put {:handler api/edit-book-title}}]
