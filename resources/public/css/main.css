@@ -13,6 +13,11 @@ body {
     color: green;
 }
 
+
+.memo {
+    color: aqua;
+}
+
 .book-text {
     white-space: pre-line;
 }

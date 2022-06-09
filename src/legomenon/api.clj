@@ -153,6 +153,12 @@
         {:status 200
          :body   (html (fe/render-trash-row word))})
 
+      (and (some? word) (= key "m"))
+      (do
+        (db/execute db/conn (add-word-to-list-q :memo (:lemma word)))
+        {:status 200
+         :body   (html (fe/render-memo-row word))})
+
       (and (some? word) (= key "u"))
       (do
         (db/execute db/conn (remove-word-from-lists-q (:lemma word)))
