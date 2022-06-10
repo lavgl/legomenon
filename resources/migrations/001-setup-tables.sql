@@ -5,6 +5,7 @@ create table books (
   user_entered_title text,
   text text not null unique,
   created_at integer not null default current_timestamp,
+  used_at integer,
   deleted_at integer
 );
 

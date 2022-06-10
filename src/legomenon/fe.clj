@@ -75,10 +75,11 @@ htmx.onLoad(element => {
 
 
 (defn books-q []
-  {:select [:id
-            [[:coalesce :user_entered_title :filename] :title]]
-   :from   [:books]
-   :where  [:= nil :deleted_at]})
+  {:select   [:id [[:coalesce :user_entered_title :filename] :title]]
+   :from     [:books]
+   :where    [:= nil :deleted_at]
+   :order-by [[:used_at :desc-nulls-last]
+              [:created_at :desc]]})
 
 
 (defn render-book [{:keys [title id]}]

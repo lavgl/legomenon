@@ -114,7 +114,7 @@
 
 
 (defn word-q [word-id]
-  {:select [:id :lemma :count]
+  {:select [:id :lemma :count :book_id]
    :from   [:lemma_count]
    :where  [:= :id word-id]})
 
@@ -134,6 +134,12 @@
    :where  [:= :word word]})
 
 
+(defn update-book-used-at-q [book-id]
+  {:update :books
+   :set    {:used_at :current_timestamp}
+   :where  [:= :id book-id]})
+
+
 (defn operate-on-word [req]
   (let [key     (-> req :params :key)
         word-id (-> req :params :id)
@@ -143,25 +149,28 @@
       (and (some? word) (= key "k"))
       (do
         (db/execute db/conn (add-word-to-list-q :known (:lemma word)))
+        (db/execute db/conn (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fe/render-known-row word))})
 
       (and (some? word) (= key "t"))
       (do
         (db/execute db/conn (add-word-to-list-q :trash (:lemma word)))
-
+        (db/execute db/conn (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fe/render-trash-row word))})
 
       (and (some? word) (= key "m"))
       (do
         (db/execute db/conn (add-word-to-list-q :memo (:lemma word)))
+        (db/execute db/conn (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fe/render-memo-row word))})
 
       (and (some? word) (= key "u"))
       (do
         (db/execute db/conn (remove-word-from-lists-q (:lemma word)))
+        (db/execute db/conn (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fe/render-plain-row word))})
 
