@@ -30,3 +30,15 @@ body {
     border-bottom: 1px solid grey;
     margin-bottom: 10px;
 }
+
+.swiping {
+    border-color: aqua;
+    border-width: 1px;
+}
+
+
+.playground {
+    /* background-color: black; */
+    /* height: 500px; */
+    /* width: 700px; */
+}

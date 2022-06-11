@@ -39,6 +39,8 @@
                 ["/api/books/:book-id/title/edit/" {:put {:handler api/edit-book-title}}]
                 ["/api/words/op/" {:post {:handler api/operate-on-word}}]
 
+                ["/api/playground/" {:get {:handler api/playground}}]
+
                 ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes
                   (ring/redirect-trailing-slash-handler {:method :add})

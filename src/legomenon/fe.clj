@@ -24,14 +24,18 @@
                       [:div.container
                        content]
                       (hiccup.page/include-js
-                       "/public/js/htmx.min.js"
-                       "/public/js/bootstrap.bundle.min.js")
+                       "/public/js/htmx.js"
+                       "/public/js/bootstrap.bundle.min.js"
+                       "/public/js/_hyperscript_web.min.js"
+                       "/public/js/swipe.js")
                       [:script
                        "
 htmx.onLoad(element => {
-  if (element.tagName == 'TR' && element.nextSibling.tagName == 'TR') {
+  if (element.tagName == 'TR' && element.nextSibling && element.nextSibling.tagName == 'TR') {
     element.nextSibling.focus();
-  }});"]]))
+  }});
+swipe.init('swipable', 100);
+"]]))
 
 
 (defn navbar [req]
@@ -132,13 +136,19 @@ htmx.onLoad(element => {
   (let [hx-trigger (->> keys-allowed
                         (map #(format "key=='%s'" %))
                         (str/join " || ")
-                        (format "keyup[%s]"))]
+                        (format "keyup[%s], swipe[detail.right]"))]
     [:tr
-     {:class      (str "dict-word " list)
+     {:_          "
+on touchstart set :x to event.changedTouches[0].screenX
+on touchmove set :dx to event.changedTouches[0].screenX - :x then
+  if :dx > 40 add .swiping to me end
+on touchend remove .swiping from me
+"
+      :class      (str "dict-word " list)
       :tabindex   "0"
       :hx-trigger hx-trigger
       :hx-post    "/api/words/op/"
-      :hx-vals    (format "js:{key: event.key, id: '%s'}" id)
+      :hx-vals    (format "js:{key: event.key, id: '%s', event: event.type, direction: event.detail.direction}" id)
       :hx-swap    "outerHTML"}
      [:td lemma]
      [:td count]]))
@@ -150,28 +160,56 @@ htmx.onLoad(element => {
 (def render-plain-row (partial render-row {:keys-allowed ["k" "t" "m"]}))
 
 
+(defn render-op-row [word]
+  [:tr
+   [:td
+    [:div.btn-group.btn-group-lg.w-100
+     ;; TODO: dont fuck myself, make util for clj->str conversion
+     ;; TODO: make normal api, dont use this 'key: t' shit
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 't', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "T"]
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 'k', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "K"]
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 'm', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "M"]
+     [:button.btn.btn-outline-info
+      "╳"]]]])
+
+
+(defn render-table-body [words]
+  (map (fn [word]
+         (case (:list word)
+           "known"
+           (render-known-row word)
+
+           "trash"
+           (render-trash-row word)
+
+           "memo"
+           (render-memo-row word)
+
+           (render-plain-row word)))
+    words))
+
+
 (defn words-table [book-id]
   (let [words (db/q db/conn (book-words-q book-id))]
     [:div.row
      [:div.col]
      [:div.col-sm-9
-      [:table
+      [:table#swipable
        [:thead
         [:tr.dict-word [:th "Word"] [:th "Count"]]]
-       [:tbody
-        (map (fn [word]
-               (case (:list word)
-                 "known"
-                 (render-known-row word)
-
-                 "trash"
-                 (render-trash-row word)
-
-                 "memo"
-                 (render-memo-row word)
-
-                 (render-plain-row word)))
-             words)]]]
+       [:tbody (render-table-body words) ]]]
      [:div.col]]))
 
 (defn book-title-q [book-id]
@@ -244,4 +282,11 @@ htmx.onLoad(element => {
 
 (defn add-book-page [req]
   {:status 200
-   :body   "ok"})
+   :body   (html (page nil [:div#playground.playground
+                            [:table {:hx-ext "debug"}
+                             [:tr [:th "header"]]
+                             (->> (range 1000)
+                                  (map (fn [i]
+                                         [:tr
+                                          [:td {:hx-trigger "swipe[detail.right]"
+                                                :hx-get     "/api/playground/"} i]])))]]))})
