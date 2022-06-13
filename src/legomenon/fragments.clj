@@ -1,5 +1,6 @@
 (ns legomenon.fragments
-  (:require [hiccup.page :as hiccup.page]))
+  (:require [clojure.string :as str]
+            [hiccup.page :as hiccup.page]))
 
 
 (defn page [header & content]
@@ -59,3 +60,33 @@ swipe.init('swipable', 100);
         [:a.nav-link {:href  "/books/add/"
                       :class (when (= page :add-book) "active")} "Add Book"]
         book-text-btn]]]]))
+
+
+(defn render-row [{:keys [keys-allowed list]}
+                  {:keys [lemma count id]}]
+  (assert keys-allowed)
+  (let [hx-trigger (->> keys-allowed
+                        (map #(format "key=='%s'" %))
+                        (str/join " || ")
+                        (format "keyup[%s], swipe[detail.right]"))]
+    [:tr
+     {:_          "
+on touchstart set :x to event.changedTouches[0].screenX
+on touchmove set :dx to event.changedTouches[0].screenX - :x then
+  if :dx > 40 add .swiping to me end
+on touchend remove .swiping from me
+"
+      :class      (str "dict-word " list)
+      :tabindex   "0"
+      :hx-trigger hx-trigger
+      :hx-post    "/api/words/op/"
+      :hx-vals    (format "js:{key: event.key, id: '%s', event: event.type, direction: event.detail.direction}" id)
+      :hx-swap    "outerHTML"}
+     [:td lemma]
+     [:td count]]))
+
+
+(def render-known-row (partial render-row {:list "known" :keys-allowed ["u"]}))
+(def render-trash-row (partial render-row {:list "trash" :keys-allowed ["u"]}))
+(def render-memo-row  (partial render-row {:list "memo" :keys-allowed ["u" "k"]}))
+(def render-plain-row (partial render-row {:keys-allowed ["k" "t" "m"]}))

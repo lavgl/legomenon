@@ -5,13 +5,13 @@
             [reitit.ring :as ring]
             [reitit.exception :as reitit.exception]
             [ring.logger :refer [wrap-with-logger]]
-            [ring.util.response :as response]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
 
-            [legomenon.api :as api]
+            [legomenon.api.add-book :as add-book]
+            [legomenon.api.words-operations :as words-op]
             [legomenon.pages.books-list :as books-list]
             [legomenon.pages.words-list :as words-list]
             [legomenon.pages.book-text :as book-text]))
@@ -33,11 +33,8 @@
                 ["/books/:id/text/" {:get  {:handler book-text/page}
                                      :page :book-text}]
 
-                ["/api/books/add/" {:post {:handler api/add-book}}]
-                ["/api/books/:book-id/title/edit/" {:put {:handler api/edit-book-title}}]
-                ["/api/words/op/" {:post {:handler api/operate-on-word}}]
-
-                ["/api/playground/" {:get {:handler api/playground}}]
+                ["/api/books/add/" {:post {:handler add-book/handler}}]
+                ["/api/words/op/" {:post {:handler words-op/handler}}]
 
                 ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes

@@ -1,6 +1,5 @@
 (ns legomenon.pages.words-list
-  (:require [clojure.string :as str]
-            [hiccup.core :refer [html]]
+  (:require [hiccup.core :refer [html]]
 
             [legomenon.db :as db]
             [legomenon.fragments :as fragments]
@@ -25,49 +24,19 @@
                  [:count :desc]]}))
 
 
-(defn render-row [{:keys [keys-allowed list]}
-                  {:keys [lemma count id]}]
-  (assert keys-allowed)
-  (let [hx-trigger (->> keys-allowed
-                        (map #(format "key=='%s'" %))
-                        (str/join " || ")
-                        (format "keyup[%s], swipe[detail.right]"))]
-    [:tr
-     {:_          "
-on touchstart set :x to event.changedTouches[0].screenX
-on touchmove set :dx to event.changedTouches[0].screenX - :x then
-  if :dx > 40 add .swiping to me end
-on touchend remove .swiping from me
-"
-      :class      (str "dict-word " list)
-      :tabindex   "0"
-      :hx-trigger hx-trigger
-      :hx-post    "/api/words/op/"
-      :hx-vals    (format "js:{key: event.key, id: '%s', event: event.type, direction: event.detail.direction}" id)
-      :hx-swap    "outerHTML"}
-     [:td lemma]
-     [:td count]]))
-
-
-(def render-known-row (partial render-row {:list "known" :keys-allowed ["u"]}))
-(def render-trash-row (partial render-row {:list "trash" :keys-allowed ["u"]}))
-(def render-memo-row  (partial render-row {:list "memo" :keys-allowed ["u" "k"]}))
-(def render-plain-row (partial render-row {:keys-allowed ["k" "t" "m"]}))
-
-
 (defn render-table-body [words]
   (map (fn [word]
          (case (:list word)
            "known"
-           (render-known-row word)
+           (fragments/render-known-row word)
 
            "trash"
-           (render-trash-row word)
+           (fragments/render-trash-row word)
 
            "memo"
-           (render-memo-row word)
+           (fragments/render-memo-row word)
 
-           (render-plain-row word)))
+           (fragments/render-plain-row word)))
     words))
 
 
