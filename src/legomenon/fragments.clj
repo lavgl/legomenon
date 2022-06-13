@@ -70,13 +70,7 @@ swipe.init('swipable', 100);
                         (str/join " || ")
                         (format "keyup[%s], swipe[detail.right]"))]
     [:tr
-     {:_          "
-on touchstart set :x to event.changedTouches[0].screenX
-on touchmove set :dx to event.changedTouches[0].screenX - :x then
-  if :dx > 40 add .swiping to me end
-on touchend remove .swiping from me
-"
-      :class      (str "dict-word " list)
+     {:class      (str "dict-word " list)
       :tabindex   "0"
       :hx-trigger hx-trigger
       :hx-post    "/api/words/op/"

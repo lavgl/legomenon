@@ -46,6 +46,11 @@
      [:div.col]
      [:div.col-sm-9
       [:table#swipable
+       {:_ "
+on touchstart from <tr/> set :x to event.changedTouches[0].screenX
+on touchmove from <tr/> set :dx to event.changedTouches[0].screenX - :x then
+if :dx > 30 add .swiping to the closest <tr/> to the event.target end
+on touchend remove .swiping from the closest <tr/> to the event.target"}
        [:thead
         [:tr.dict-word [:th "Word"] [:th "Count"]]]
        [:tbody (render-table-body words) ]]]
