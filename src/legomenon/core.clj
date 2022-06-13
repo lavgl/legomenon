@@ -11,8 +11,10 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
 
-            [legomenon.fe :as fe]
-            [legomenon.api :as api]))
+            [legomenon.api :as api]
+            [legomenon.pages.books-list :as books-list]
+            [legomenon.pages.words-list :as words-list]
+            [legomenon.pages.book-text :as book-text]))
 
 ;; TODO: move to config
 (def PORT 5000)
@@ -23,17 +25,13 @@
 
 
 (defn make-app []
-  (let [routes [["/" {:get  {:handler fe/index}
+  ;; NOTE: :page is used for navbar building
+  (let [routes [["/" {:get  {:handler books-list/page}
                       :page :books-list}]
-                ;; NOTE: id is used for navbar building
-                ["/books/add/" {:handler fe/add-book-page
-                                :page    :add-book}]
-                ["/books/:id/" {:get {:handler fe/book-dictionary-page
+                ["/books/:id/" {:get {:handler words-list/page
                                       :page    :book-dict}}]
-                ["/books/:id/text/" {:get  {:handler fe/book-text-page}
+                ["/books/:id/text/" {:get  {:handler book-text/page}
                                      :page :book-text}]
-
-                ;; ["/fragments/edit-book-title/" {:get {:handler fe/edit-book-title-fragment}}]
 
                 ["/api/books/add/" {:post {:handler api/add-book}}]
                 ["/api/books/:book-id/title/edit/" {:put {:handler api/edit-book-title}}]
