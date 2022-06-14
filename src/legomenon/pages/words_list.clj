@@ -51,10 +51,12 @@ init
   set :dx_to_hightlight to 50
   set :dx_to_be_swiped to 50
 
+
 on touchstart from <tr/>
   set :x to event.changedTouches[0].screenX
   set :y to event.changedTouches[0].screenY
   set :state to 'none'
+
 
 on touchmove from <tr/>
   if :state is 'scrolling' exit end
@@ -76,14 +78,19 @@ on touchmove from <tr/>
   if :dx > :dx_to_hightlight add .swiping to the :tr
   else remove .swiping from the :tr end
 
+
 on touchend
   if :state is 'swiping' and :dx > :dx_to_be_swiped
     set word_id to @data-word-id of :tr
     fetch `/fragments/op-row/?word-id=${word_id}`
     then put the result into :tr's outerHTML
+    then htmx.process(document.body)
   end
 
-  remove .swiping from the :tr then
+  if :tr exists
+   remove .swiping from the :tr then
+  end
+
   set :state to 'none'
 "}
        [:thead
