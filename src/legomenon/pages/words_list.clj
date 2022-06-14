@@ -45,12 +45,45 @@
     [:div.row
      [:div.col]
      [:div.col-sm-9
-      [:table#swipable
+      [:table
        {:_ "
-on touchstart from <tr/> set :x to event.changedTouches[0].screenX
-on touchmove from <tr/> set :dx to event.changedTouches[0].screenX - :x then
-if :dx > 30 add .swiping to the closest <tr/> to the event.target end
-on touchend remove .swiping from the closest <tr/> to the event.target"}
+init
+  set :dx_to_hightlight to 50
+  set :dx_to_be_swiped to 50
+
+on touchstart from <tr/>
+  set :x to event.changedTouches[0].screenX
+  set :y to event.changedTouches[0].screenY
+  set :state to 'none'
+
+on touchmove from <tr/>
+  if :state is 'scrolling' exit end
+
+  set :dx to event.changedTouches[0].screenX - :x
+  set :dy to event.changedTouches[0].screenY - :y
+  set :tr to the closest <tr/> to the event.target
+
+  if :state is 'none' and Math.abs(:dy) > Math.abs(:dx)
+    set :state to 'scrolling'
+  else
+    set :state to 'swiping'
+  end
+
+  if :state is 'swiping'
+    halt the event
+  end
+
+  if :dx > :dx_to_hightlight add .swiping to the :tr
+  else remove .swiping from the :tr end
+
+on touchend
+  if :state is 'swiping' and :dx > :dx_to_be_swiped
+    send 'swipe' to :tr
+  end
+
+  remove .swiping from the :tr then
+  set :state to 'none'
+"}
        [:thead
         [:tr.dict-word [:th "Word"] [:th "Count"]]]
        [:tbody (render-table-body words) ]]]

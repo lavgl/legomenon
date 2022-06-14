@@ -68,7 +68,7 @@ swipe.init('swipable', 100);
   (let [hx-trigger (->> keys-allowed
                         (map #(format "key=='%s'" %))
                         (str/join " || ")
-                        (format "keyup[%s], swipe[detail.right]"))]
+                        (format "keyup[%s], swipe"))]
     [:tr
      {:class      (str "dict-word " list)
       :tabindex   "0"
@@ -84,3 +84,28 @@ swipe.init('swipable', 100);
 (def render-trash-row (partial render-row {:list "trash" :keys-allowed ["u"]}))
 (def render-memo-row  (partial render-row {:list "memo" :keys-allowed ["u" "k"]}))
 (def render-plain-row (partial render-row {:keys-allowed ["k" "t" "m"]}))
+
+
+(defn render-op-row [word]
+  [:tr
+   [:td
+    [:div.btn-group.btn-group-lg.w-100
+     ;; TODO: dont fuck myself, make util for clj->str conversion
+     ;; TODO: make normal api, dont use this 'key: t' shit
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 't', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "T"]
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 'k', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "K"]
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 'm', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "M"]
+     [:button.btn.btn-outline-info
+      "╳"]]]])
