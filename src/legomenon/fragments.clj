@@ -70,12 +70,13 @@ swipe.init('swipable', 100);
                         (str/join " || ")
                         (format "keyup[%s], swipe"))]
     [:tr
-     {:class      (str "dict-word " list)
-      :tabindex   "0"
-      :hx-trigger hx-trigger
-      :hx-post    "/api/words/op/"
-      :hx-vals    (format "js:{key: event.key, id: '%s', event: event.type, direction: event.detail.direction}" id)
-      :hx-swap    "outerHTML"}
+     {:class        (str "dict-word " list)
+      :data-word-id id
+      :tabindex     "0"
+      :hx-trigger   hx-trigger
+      :hx-post      "/api/words/op/"
+      :hx-vals      (format "js:{key: event.key, id: '%s', event: event.type, direction: event.detail.direction}" id)
+      :hx-swap      "outerHTML"}
      [:td lemma]
      [:td count]]))
 

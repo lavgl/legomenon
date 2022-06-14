@@ -78,7 +78,9 @@ on touchmove from <tr/>
 
 on touchend
   if :state is 'swiping' and :dx > :dx_to_be_swiped
-    send 'swipe' to :tr
+    set word_id to @data-word-id of :tr
+    fetch `/fragments/op-row/?word-id=${word_id}`
+    then put the result into :tr's outerHTML
   end
 
   remove .swiping from the :tr then

@@ -77,3 +77,10 @@
 
       :else
       {:status 400 :body "error"})))
+
+
+(defn render-op-row [req]
+  (let [word-id (-> req :params :word-id)
+        word    (db/one db/conn (word-q word-id))]
+    {:status 200
+     :body   (html (fragments/render-op-row word))}))

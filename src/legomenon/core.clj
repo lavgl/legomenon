@@ -33,6 +33,8 @@
                 ["/books/:id/text/" {:get  {:handler book-text/page}
                                      :page :book-text}]
 
+                ["/fragments/op-row/" {:get {:handler words-op/render-op-row}}]
+
                 ["/api/books/add/" {:post {:handler add-book/handler}}]
                 ["/api/words/op/" {:post {:handler words-op/handler}}]
 
