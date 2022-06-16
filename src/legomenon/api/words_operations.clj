@@ -71,6 +71,13 @@
         {:status 200
          :body   (html (fragments/render-plain-row word))})
 
+      (and keyup? (some? word) (= key "p"))
+      (do
+        (db/execute db/conn (add-word-to-list-q :postponed (:lemma word)))
+        (db/execute db/conn (update-book-used-at-q (:book_id word)))
+        {:status 200
+         :body   (html (fragments/render-postponed-row word))})
+
       (and swipe? (= direction "right"))
       {:status 200
        :body   (html (fragments/render-op-row word))}

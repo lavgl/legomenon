@@ -13,9 +13,12 @@ body {
     color: green;
 }
 
-
 .memo {
     color: aqua;
+}
+
+.postponed {
+    color: yellow;
 }
 
 .book-text {

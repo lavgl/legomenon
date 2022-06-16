@@ -81,10 +81,11 @@ swipe.init('swipable', 100);
      [:td count]]))
 
 
-(def render-known-row (partial render-row {:list "known" :keys-allowed ["u"]}))
-(def render-trash-row (partial render-row {:list "trash" :keys-allowed ["u"]}))
-(def render-memo-row  (partial render-row {:list "memo" :keys-allowed ["u" "k"]}))
-(def render-plain-row (partial render-row {:keys-allowed ["k" "t" "m"]}))
+(def render-known-row     (partial render-row {:list "known" :keys-allowed ["u"]}))
+(def render-trash-row     (partial render-row {:list "trash" :keys-allowed ["u"]}))
+(def render-postponed-row (partial render-row {:list "postponed" :keys-allowed ["u"]}))
+(def render-memo-row      (partial render-row {:list "memo" :keys-allowed ["u" "k"]}))
+(def render-plain-row     (partial render-row {:keys-allowed ["k" "t" "m" "p"]}))
 
 
 (defn render-op-row [word]

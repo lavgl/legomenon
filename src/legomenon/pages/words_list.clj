@@ -8,10 +8,11 @@
 
 (defn book-words-q [book-id]
   (let [priority [:case
-                  [:= :list "memo"]  3
-                  [:= :list nil]     2
-                  [:= :list "known"] 1
-                  [:= :list "trash"] 0]]
+                  [:= :list "memo"]      4
+                  [:= :list nil]         3
+                  [:= :list "postponed"] 2
+                  [:= :list "known"]     1
+                  [:= :list "trash"]     0]]
     {:from      [:lemma_count]
      :left-join [:my_words [:and
                             [:= :my_words.word :lemma_count.lemma]
@@ -35,6 +36,9 @@
 
            "memo"
            (fragments/render-memo-row word)
+
+           "postponed"
+           (fragments/render-postponed-row word)
 
            (fragments/render-plain-row word)))
     words))
