@@ -5,7 +5,6 @@
             [reitit.ring :as ring]
             [reitit.exception :as reitit.exception]
             [ring.logger :refer [wrap-with-logger]]
-            [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
@@ -15,6 +14,7 @@
             [legomenon.pages.books-list :as books-list]
             [legomenon.pages.words-list :as words-list]
             [legomenon.pages.book-text :as book-text]))
+
 
 ;; TODO: move to config
 (def PORT 5000)
@@ -47,8 +47,7 @@
         (wrap-keyword-params)
         (wrap-params)
         (wrap-multipart-params)
-        (wrap-with-logger)
-        (wrap-reload))))
+        (wrap-with-logger))))
 
 
 (mount/defstate server
