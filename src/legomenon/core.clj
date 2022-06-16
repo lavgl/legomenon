@@ -62,20 +62,3 @@
 
 (defn -main [& _args]
   (mount/start #'server))
-
-
-;; development stuff
-
-(defn start []
-  (mount/start))
-
-
-(defn stop []
-  (mount/stop))
-
-
-(defn reload []
-  (stop)
-  (start))
-
-
