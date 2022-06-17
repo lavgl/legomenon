@@ -1,4 +1,5 @@
 (ns legomenon.core
+  (:gen-class)
   (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
             [aleph.http :as http]

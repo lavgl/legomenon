@@ -24,4 +24,7 @@
                       cider/cider-nrepl           {:mvn/version "0.28.4"}
                       com.nextjournal/beholder    {:mvn/version "1.0.0"}
                       org.clojure/tools.namespace {:mvn/version "1.3.0"}}
-        :main-opts   ["-m" "legomenon.dev"]}}}
+        :main-opts   ["-m" "legomenon.dev"]}
+
+  :build {:deps       {io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}}
+          :ns-default build}}}
