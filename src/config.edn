@@ -1,1 +1,2 @@
-{:db {:path #or [#env DB_PATH "/Users/v.homonov/.legomenon/database.db"]}}
+{:db {:path #or [#env DB_PATH
+                 #envf ["%s/.legomenon/database.db" HOME]]}}
