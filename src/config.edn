@@ -1,0 +1,1 @@
+{:db {:path #or [#env DB_PATH "/Users/v.homonov/.legomenon/database.db"]}}

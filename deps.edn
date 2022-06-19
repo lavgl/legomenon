@@ -1,7 +1,10 @@
 {:paths ["src" "resources"]
  :deps
- {org.clojure/clojure                      {:mvn/version "1.11.0"}
-  org.clojure/tools.logging                {:mvn/version "1.2.4"}
+ {org.clojure/clojure       {:mvn/version "1.11.0"}
+  org.clojure/tools.logging {:mvn/version "1.2.4"}
+  aero/aero                 {:mvn/version "1.1.6"}
+  mount/mount               {:mvn/version "0.1.16"}
+
   dk.simongray/datalinguist                {:mvn/version "0.1.163"}
   edu.stanford.nlp/stanford-corenlp$models {:mvn/version "4.3.2"}
   com.novemberain/pantomime                {:mvn/version "2.11.0"}
@@ -10,13 +13,11 @@
   org.xerial/sqlite-jdbc           {:mvn/version "3.36.0.3"}
   com.github.seancorfield/honeysql {:mvn/version "2.2.891"}
 
-  aleph/aleph {:mvn/version "0.5.0-rc2"}
-
+  aleph/aleph             {:mvn/version "0.5.0-rc2"}
   ring/ring-core          {:mvn/version "1.9.5"}
-  ring-logger/ring-logger {:mvn/version "1.1.1"}
   metosin/reitit          {:mvn/version "0.5.18"}
-  mount/mount             {:mvn/version "0.1.16"}
-  hiccup/hiccup           {:mvn/version "1.0.5"}}
+  hiccup/hiccup           {:mvn/version "1.0.5"}
+  ring-logger/ring-logger {:mvn/version "1.1.1"}}
 
  :aliases
  {:dev {:extra-paths ["dev"]

@@ -1,6 +1,10 @@
 (ns legomenon.db
-  (:require [clojure.java.jdbc :as jdbc]
-            [honey.sql :as sql]))
+  (:require [clojure.tools.logging :as log]
+            [clojure.java.jdbc :as jdbc]
+            [mount.core :as mount]
+            [honey.sql :as sql]
+
+            [legomenon.config :as config]))
 
 
 (def call sql/call)
@@ -23,9 +27,12 @@
   :insert-into)
 
 
-(def conn {:classname   "org.sqlite.JDBC"
-           :subprotocol "sqlite"
-           :subname     "resources/database.db"})
+(mount/defstate conn
+  :start (let [subname (config/db-path)]
+           (log/infof "db path: %s" subname)
+           {:classname   "org.sqlite.JDBC"
+            :subprotocol "sqlite"
+            :subname     subname}))
 
 
 (defn- query->args [query]
