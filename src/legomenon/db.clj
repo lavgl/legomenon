@@ -29,7 +29,7 @@
 
 (mount/defstate conn
   :start (let [subname (config/db-path)]
-           (log/infof "db path: %s" subname)
+           (log/infof "init: %s" subname)
            {:classname   "org.sqlite.JDBC"
             :subprotocol "sqlite"
             :subname     subname}))

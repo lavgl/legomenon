@@ -14,7 +14,10 @@
             [legomenon.api.words-operations :as words-op]
             [legomenon.pages.books-list :as books-list]
             [legomenon.pages.words-list :as words-list]
-            [legomenon.pages.book-text :as book-text]))
+            [legomenon.pages.book-text :as book-text]
+
+            [legomenon.config]
+            [legomenon.db]))
 
 
 ;; TODO: move to config
@@ -61,4 +64,4 @@
 
 
 (defn -main [& _args]
-  (mount/start #'server))
+  (mount/start))
