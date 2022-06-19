@@ -1,6 +1,8 @@
 (ns legomenon.api.add-book
+  (:refer-clojure :exclude [number?])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [mount.core :as mount]
             [pantomime.extract :as extract]
             [dk.simongray.datalinguist :as nlp]
 
@@ -30,8 +32,8 @@
 ;; lemmas extraction
 
 
-;; NOTE: is it ok to keep it in file scope instead of wrap in state?
-(def nlp-pipeline (nlp/->pipeline {:annotators ["lemma"]}))
+(mount/defstate nlp
+  :start (nlp/->pipeline {:annotators ["lemma"]}))
 
 
 (defn punctuation? [s]
@@ -59,7 +61,7 @@
 
 
 (defn lemma-frequencies [text]
-  (->> (nlp-pipeline text)
+  (->> (nlp text)
        nlp/tokens
        nlp/lemma
        nlp/recur-datafy
