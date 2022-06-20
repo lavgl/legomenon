@@ -4,9 +4,6 @@ git pull
 
 make build
 
-PID=$(lsof -i -P -n | grep '5000 (LISTEN)' | awk '{ print $2 }')
-kill -9 $PID
+lsof -t -i:5000 | xargs kill -9
 
-tmux attach
-
-find . -name "*.jar" | xargs -n 1 java -jar &
+nohup java -jar target/legomenon-*.jar &
