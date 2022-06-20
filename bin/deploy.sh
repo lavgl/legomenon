@@ -9,4 +9,4 @@ kill -9 $PID
 
 tmux attach
 
-find . -name "*.jar" | xargs -n 1 java -jar
+find . -name "*.jar" | xargs -n 1 java -jar &
