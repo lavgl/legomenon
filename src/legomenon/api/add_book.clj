@@ -33,7 +33,7 @@
 
 
 (mount/defstate nlp
-  :start (nlp/->pipeline {:annotators ["lemma"]}))
+  :start (nlp/->pipeline {:annotators ["lemma" "ner"]}))
 
 
 (defn punctuation? [s]
@@ -68,8 +68,9 @@
   (->> (remove-explicit-line-breaks text)
        nlp
        nlp/tokens
-       nlp/lemma
        nlp/recur-datafy
+       (filter #(= "O" (:named-entity-tag %)))
+       (map :lemma)
        (remove punctuation?)
        (remove number?)
        (remove contacts?)
