@@ -60,8 +60,13 @@
   (str/starts-with? s "http"))
 
 
+(defn remove-explicit-line-breaks [text]
+  (str/replace text "-\n" ""))
+
+
 (defn lemma-frequencies [text]
-  (->> (nlp text)
+  (->> (remove-explicit-line-breaks text)
+       nlp
        nlp/tokens
        nlp/lemma
        nlp/recur-datafy
