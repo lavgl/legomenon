@@ -15,6 +15,7 @@
             [legomenon.pages.books-list :as books-list]
             [legomenon.pages.words-list :as words-list]
             [legomenon.pages.book-text :as book-text]
+            [legomenon.pages.book-settings :as book-settings]
 
             [legomenon.config]
             [legomenon.db]))
@@ -34,12 +35,16 @@
                       :page :books-list}]
                 ["/books/:id/" {:get {:handler words-list/page
                                       :page    :book-dict}}]
-                ["/books/:id/text/" {:get  {:handler book-text/page}
-                                     :page :book-text}]
+                ["/books/:id/text/" {:get {:handler book-text/page
+                                           :page    :book-text}}]
+                ["/books/:id/settings/" {:get {:handler book-settings/page
+                                               :page    :book-settings}}]
 
                 ["/fragments/op-row/" {:get {:handler words-op/render-op-row}}]
 
+                ["/api/books/:id/" {:delete {:handler book-settings/delete-book-handler}}]
                 ["/api/books/add/" {:post {:handler add-book/handler}}]
+                ["/api/books/:id/rename/" {:put {:handler book-settings/rename-book-handler}}]
                 ["/api/words/op/" {:post {:handler words-op/handler}}]
 
                 ["/public/*" (ring/create-resource-handler)]]

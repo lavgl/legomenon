@@ -22,7 +22,10 @@
 (defn render-book [{:keys [title id]}]
   [:div {}
    [:a {:href (format "/books/%s/" id)} title]
-   " (" [:a {:href (format "/books/%s/text/" id)} "text"] ")"])
+   " ("
+   [:a {:href (format "/books/%s/text/" id)} "text"] ", "
+   [:a {:href (format "/books/%s/settings/" id)} "settings"]
+   ")"])
 
 
 (defn books-list []

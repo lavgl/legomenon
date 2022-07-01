@@ -10,7 +10,6 @@
 (def call sql/call)
 (def fmt sql/format)
 
-
 (defn- insert-or-*-into-formatter [clause table]
   [(str (sql/sql-kw clause) " " (sql/format-entity table))])
 
@@ -58,3 +57,8 @@
   (let [q {:select [1]
            :where  [:exists subq]}]
     (some? (one conn q))))
+
+
+(defmacro with-tx [tx-bindings & body]
+  `(jdbc/with-db-transaction ~tx-bindings
+     ~@body))

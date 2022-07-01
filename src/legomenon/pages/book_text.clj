@@ -19,7 +19,8 @@
         {:keys [title is_book_exists]} (db/one db/conn (book/title-q book-id))]
     (if (pos? is_book_exists)
       {:status 200
-       :body   (html (fragments/page nil
+       :body   (html (fragments/page
+                       (fragments/navbar req)
                        [:div
                         (book/render-title {:book-id book-id
                                             :title   title})

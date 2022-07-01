@@ -5,12 +5,11 @@
 
 (defn page [header & content]
   (hiccup.page/html5 {:encoding "UTF-8"}
-                     [:head {}
-                      [:meta {:charset "UTF-8"}]
-                      [:meta {:name    "viewport"
-                              :content "width=device-width, initial-scale=1"}]
+    [:head {}
+     [:meta {:charset "UTF-8"}]
+     [:meta {:name    "viewport"
+             :content "width=device-width, initial-scale=1"}]
                       (hiccup.page/include-css
-       ;; "/public/css/normalize.css"
                        "/public/css/bootstrap.min.css"
                        "/public/css/main.css")]
                      [:body
@@ -30,19 +29,28 @@ htmx.onLoad(element => {
   if (element.tagName == 'TR' && element.nextSibling && element.nextSibling.tagName == 'TR') {
     element.nextSibling.focus();
   }});
-swipe.init('swipable', 100);
 "]]))
 
 
 (defn navbar [req]
-  (let [page          (-> req :reitit.core/match :data :get :page)
-        back-btn      (case page
-                        (:add-book :book-dict) [:a.nav-link {:href "/"} "Go back"]
-                        [:a.nav-link "Legomenon"])
-        book-text-btn (case page
-                        :book-dict (let [book-id (-> req :path-params :id)]
-                                     [:a.nav-link {:href (format "/books/%s/text/" book-id)} "This Book Text"])
-                        nil)]
+  (let [page              (-> req :reitit.core/match :data :get :page)
+        book-id           (-> req :path-params :id)
+        back-btn          (case page
+                            (:add-book :book-dict) [:a.nav-link {:href "/"} "Go back"]
+                            [:a.nav-link "Legomenon"])
+        book-dict-btn     (case page
+                            (:book-text :book-settings)
+                            [:a.nav-link {:href (format "/books/%s/" book-id)} "Words"]
+                            nil)
+        book-text-btn     (case page
+                            (:book-dict :book-settings)
+                            [:a.nav-link {:href (format "/books/%s/text/" book-id)} "Text"]
+                            nil)
+        book-settings-btn (case page
+                            (:book-dict :book-text)
+                            [:a.nav-link {:href (format "/books/%s/settings/" book-id)} "Settings"]
+                            nil)]
+    (println "page" page)
     [:nav.navbar.navbar-dark.navbar-expand-lg
      [:div.container-fluid
       back-btn
@@ -57,9 +65,11 @@ swipe.init('swipable', 100);
        [:div.navbar-nav
         [:a.nav-link {:href  "/"
                       :class (when (= page :books-list) "active")} "Books List"]
-        [:a.nav-link {:href  "/books/add/"
-                      :class (when (= page :add-book) "active")} "Add Book"]
-        book-text-btn]]]]))
+        ;; [:a.nav-link {:href  "/books/add/"
+        ;;               :class (when (= page :add-book) "active")} "Add Book"]
+        book-dict-btn
+        book-text-btn
+        book-settings-btn]]]]))
 
 
 (defn render-row [{:keys [keys-allowed list]}
