@@ -42,8 +42,8 @@
 
                 ["/fragments/op-row/" {:get {:handler words-op/render-op-row}}]
 
-                ["/api/books/:id/" {:delete {:handler book-settings/delete-book-handler}}]
                 ["/api/books/add/" {:post {:handler add-book/handler}}]
+                ["/api/books/:id/" {:delete {:handler book-settings/delete-book-handler}}]
                 ["/api/books/:id/rename/" {:put {:handler book-settings/rename-book-handler}}]
                 ["/api/words/op/" {:post {:handler words-op/handler}}]
 
