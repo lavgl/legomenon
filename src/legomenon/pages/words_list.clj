@@ -25,23 +25,40 @@
                  [:count :desc]]}))
 
 
+(defn occur-rate [word-count total-words-count]
+  (format "%.2f"
+    (-> word-count
+        (/ total-words-count)
+        (* 1e4))))
+
+
+(defn assign-occur-rate-to-first-by-group [total-words-count words]
+  (->> words
+       (partition 2 1)
+       (map (fn [[a b]]
+              (cond-> b
+                (not= (:count a) (:count b))
+                (assoc :occur-rate (occur-rate (:count b) total-words-count)))))))
+
+
 (defn render-table-body [words]
-  (map (fn [word]
-         (case (:list word)
-           "known"
-           (fragments/render-known-row word)
+  (let [total-words-count (->> words (map :count) (apply +))]
+    (->> (assign-occur-rate-to-first-by-group total-words-count words)
+         (map (fn [word]
+                (case (:list word)
+                  "known"
+                  (fragments/render-known-row word)
 
-           "trash"
-           (fragments/render-trash-row word)
+                  "trash"
+                  (fragments/render-trash-row word)
 
-           "memo"
-           (fragments/render-memo-row word)
+                  "memo"
+                  (fragments/render-memo-row word)
 
-           "postponed"
-           (fragments/render-postponed-row word)
+                  "postponed"
+                  (fragments/render-postponed-row word)
 
-           (fragments/render-plain-row word)))
-    words))
+                  (fragments/render-plain-row word)))))))
 
 
 (defn words-table [book-id]
@@ -98,7 +115,7 @@ on touchend
   set :state to 'none'
 "}
        [:thead
-        [:tr.dict-word [:th "Word"] [:th "Count"]]]
+        [:tr.dict-word [:th "Word"] [:th "Count"] [:th "Occurrence rate"]]]
        [:tbody (render-table-body words) ]]]
      [:div.col]]))
 

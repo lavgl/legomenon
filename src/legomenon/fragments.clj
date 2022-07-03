@@ -73,7 +73,7 @@ htmx.onLoad(element => {
 
 
 (defn render-row [{:keys [keys-allowed list]}
-                  {:keys [lemma count id]}]
+                  {:keys [lemma count id occur-rate]}]
   (assert keys-allowed)
   (let [hx-trigger (->> keys-allowed
                         (map #(format "key=='%s'" %))
@@ -88,7 +88,8 @@ htmx.onLoad(element => {
       :hx-vals      (format "js:{key: event.key, id: '%s', event: event.type, direction: event.detail.direction}" id)
       :hx-swap      "outerHTML"}
      [:td lemma]
-     [:td count]]))
+     [:td count]
+     [:td occur-rate]]))
 
 
 (def render-known-row     (partial render-row {:list "known" :keys-allowed ["u"]}))
