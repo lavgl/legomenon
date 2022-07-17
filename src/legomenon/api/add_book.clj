@@ -77,7 +77,6 @@
 
 (defn lemma-frequencies [text]
   (let [xf (comp
-             (map-indexed (fn [i s] (println i) s))
              (map nlp)
              (map nlp/tokens)
              (mapcat nlp/recur-datafy)
