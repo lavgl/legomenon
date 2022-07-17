@@ -32,6 +32,10 @@
 ;; lemmas extraction
 
 
+(mount/defstate sentence-splitter
+  :start (nlp/->pipeline {:annotators ["ssplit"]}))
+
+
 (mount/defstate nlp
   :start (nlp/->pipeline {:annotators ["lemma" "ner"]}))
 
@@ -64,20 +68,31 @@
   (str/replace text "-\n" ""))
 
 
+(defn split-sentences [text]
+  (->> text
+       sentence-splitter
+       nlp/sentences
+       nlp/text))
+
+
 (defn lemma-frequencies [text]
-  (->> (remove-explicit-line-breaks text)
-       nlp
-       nlp/tokens
-       nlp/recur-datafy
-       (filter #(= "O" (:named-entity-tag %)))
-       (map :lemma)
-       (remove punctuation?)
-       (remove number?)
-       (remove contacts?)
-       (remove url?)
-       (map str/lower-case)
-       frequencies
-       (sort-by second >)))
+  (let [xf (comp
+             (map-indexed (fn [i s] (println i) s))
+             (map nlp)
+             (map nlp/tokens)
+             (mapcat nlp/recur-datafy)
+             (filter #(= "O" (:named-entity-tag %)))
+             (map :lemma)
+             (remove punctuation?)
+             (remove number?)
+             (remove contacts?)
+             (remove url?)
+             (map str/lower-case))]
+    (->> (remove-explicit-line-breaks text)
+         (split-sentences)
+         (transduce xf conj)
+         frequencies
+         (sort-by second >))))
 
 
 (defn insert-lemmas-q [values]
