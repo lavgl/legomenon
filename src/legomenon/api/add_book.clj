@@ -40,12 +40,13 @@
   :start (nlp/->pipeline {:annotators ["lemma" "ner"]}))
 
 
-(defn punctuation? [s]
-  (boolean (re-matches #"^\W$" s)))
+(defn has-punctuation? [s]
+  (and (re-seq #"[^a-zA-Z]" s)
+       (not (re-matches #"^\w+-\w+$" s))))
 
 
-(defn number? [s]
-  (boolean (re-matches #"^\d*$" s)))
+(defn has-number? [s]
+  (boolean (re-seq #"\d" s)))
 
 
 (defn phone? [s]
@@ -82,8 +83,8 @@
              (mapcat nlp/recur-datafy)
              (filter #(= "O" (:named-entity-tag %)))
              (map :lemma)
-             (remove punctuation?)
-             (remove number?)
+             (remove has-punctuation?)
+             (remove has-number?)
              (remove contacts?)
              (remove url?)
              (map str/lower-case))]
