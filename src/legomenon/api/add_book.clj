@@ -37,32 +37,17 @@
 
 
 (mount/defstate nlp
-  :start (nlp/->pipeline {:annotators ["lemma" "ner"]}))
+  :start (nlp/->pipeline {:annotators ["lemma"]}))
 
 
-(defn has-punctuation? [s]
-  (and (re-seq #"[^a-zA-Z]" s)
-       (not (re-matches #"^\w+-\w+$" s))))
+(mount/defstate words
+  :start (->> (slurp (io/resource "words"))
+              (str/split-lines)
+              set))
 
 
-(defn has-number? [s]
-  (boolean (re-seq #"\d" s)))
-
-
-(defn phone? [s]
-  (boolean (re-matches #"^\+\d+$" s)))
-
-
-(defn email? [s]
-  (str/includes? s "@"))
-
-
-(defn contacts? [s]
-  (or (phone? s) (email? s)))
-
-
-(defn url? [s]
-  (str/starts-with? s "http"))
+(defn word-exists? [s]
+  (contains? words s))
 
 
 (defn remove-explicit-line-breaks [text]
@@ -81,12 +66,8 @@
              (map nlp)
              (map nlp/tokens)
              (mapcat nlp/recur-datafy)
-             (filter #(= "O" (:named-entity-tag %)))
              (map :lemma)
-             (remove has-punctuation?)
-             (remove has-number?)
-             (remove contacts?)
-             (remove url?)
+             (filter word-exists?)
              (map str/lower-case))]
     (->> (remove-explicit-line-breaks text)
          (split-sentences)
