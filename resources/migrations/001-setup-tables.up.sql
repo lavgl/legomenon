@@ -1,4 +1,4 @@
-create table books (
+create table if not exists books (
   -- id is calculated as a book text hash
   id text primary key,
   filename text not null,
@@ -10,7 +10,7 @@ create table books (
 );
 
 
-create table lemma_count (
+create table if not exists lemma_count (
   id integer primary key,
   book_id text not null,
   lemma text not null,
@@ -18,7 +18,7 @@ create table lemma_count (
 );
 
 
-create table my_words (
+create table if not exists my_words (
   word text primary key,
   list text,
   deleted_at integer

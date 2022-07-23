@@ -3,6 +3,10 @@
             [clojure.java.jdbc :as jdbc]
             [mount.core :as mount]
             [honey.sql :as sql]
+            [ragtime.repl]
+            [ragtime.jdbc]
+            [ragtime.strategy]
+            [ragtime.reporter]
 
             [legomenon.config :as config]))
 
@@ -26,12 +30,22 @@
   :insert-into)
 
 
+(defn ragtime-config [db]
+  {:datastore  (ragtime.jdbc/sql-database db)
+   :migrations (ragtime.jdbc/load-resources "migrations")
+   :strategy   ragtime.strategy/apply-new
+   :reporter   ragtime.reporter/print})
+
+
 (mount/defstate conn
-  :start (let [subname (config/db-path)]
+  :start (let [subname (config/db-path)
+               db-spec {:classname   "org.sqlite.JDBC"
+                        :subprotocol "sqlite"
+                        :subname     subname}]
+           (doto (ragtime-config db-spec)
+             (ragtime.repl/migrate))
            (log/infof "init: %s" subname)
-           {:classname   "org.sqlite.JDBC"
-            :subprotocol "sqlite"
-            :subname     subname}))
+           db-spec))
 
 
 (defn- query->args [query]
