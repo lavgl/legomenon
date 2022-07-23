@@ -2,18 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
 
-            [dk.simongray.datalinguist :as nlp]
-
-            ))
-
-
-;; 1. get dict text
-;; 2. split on chunks
-;; 3. process chunks
-;; 3.1. remove words where lemma is not equal to word itself
-;; 3.2. remove all except O
-;; 3.3. remove if there numbers or punctuations
-;; 4. save new file
+            [dk.simongray.datalinguist :as nlp]))
 
 
 (def allowed-entity-tags #{"O" "TIME" "SET" "DATE" "TITLE" "DURATION"})
