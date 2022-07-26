@@ -40,7 +40,6 @@
         word-id    (-> req :params :id)
         keyup?     (= event-type "keyup")
         swipe?     (= event-type "swipe")
-        ;; TODO: move to deps.edn and use blet
         word       (db/one db/conn (word-q word-id))]
     (cond
       (and keyup? (some? word) (= key "k"))

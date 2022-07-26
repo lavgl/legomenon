@@ -100,7 +100,7 @@ htmx.onLoad(element => {
 
 (defn render-op-row [word]
   [:tr
-   [:td
+   [:td {:colspan 2}
     [:div.btn-group.btn-group-lg.w-100
      ;; TODO: dont fuck myself, make util for clj->str conversion
      ;; TODO: make normal api, dont use this 'key: t' shit
@@ -119,7 +119,15 @@ htmx.onLoad(element => {
                                     :hx-target "closest tr"
                                     :hx-swap   "outerHTML"}
       "M"]
-     [:button.btn.btn-outline-info
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 'p', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
+      "P"]
+     [:button.btn.btn-outline-info {:hx-post   "/api/words/op/"
+                                    :hx-vals   (format "js:{event: 'keyup', key: 'u', id: '%s'}" (:id word))
+                                    :hx-target "closest tr"
+                                    :hx-swap   "outerHTML"}
       "╳"]]]])
 
 
