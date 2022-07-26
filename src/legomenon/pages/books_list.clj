@@ -4,9 +4,9 @@
 
 
 (defn add-book-form []
-  [:form {:method  "post"
-          :enctype "multipart/form-data"
-          :action  "/api/books/add"}
+  [:form {:hx-post     "/api/books/add"
+          :hx-encoding "multipart/form-data"
+          :hx-swap     "beforeend"}
    [:input {:type "file" :id "file" :name "file"}]
    [:button "Submit"]])
 

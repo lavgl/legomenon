@@ -18,7 +18,9 @@
   ring/ring-core          {:mvn/version "1.9.5"}
   metosin/reitit          {:mvn/version "0.5.18"}
   hiccup/hiccup           {:mvn/version "1.0.5"}
-  ring-logger/ring-logger {:mvn/version "1.1.1"}}
+  ring-logger/ring-logger {:mvn/version "1.1.1"}
+  better-cond/better-cond {:mvn/version "2.1.5"}
+  tick/tick               {:mvn/version "0.5.0"}}
 
  :aliases
  {:dev {:extra-paths ["dev"]

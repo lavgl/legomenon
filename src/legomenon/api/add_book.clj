@@ -2,17 +2,44 @@
   (:refer-clojure :exclude [number?])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [hiccup.core :refer [html]]
             [mount.core :as mount]
             [pantomime.extract :as extract]
             [dk.simongray.datalinguist :as nlp]
+            [better-cond.core :as b]
+            [tick.core :as t]
 
             [legomenon.db :as db]
-            [legomenon.utils :as utils]))
+            [legomenon.utils :as utils]
+            [legomenon.fragments :as fragments]))
 
 
 (defn insert-book-q [book]
   {:insert-into [:books]
    :values      [book]})
+
+
+(defn book-q [id]
+  {:select [:id]
+   :from   [:books]
+   :where  [:= :id id]})
+
+
+(defn init-progress-q []
+  {:insert-into [:uploading_progress]
+   :values      [{:current_percent 0}]
+   :returning   [:id]})
+
+
+(defn update-progress-q [id progress]
+  {:update :uploading_progress
+   :set    {:current_percent progress}
+   :where  [:= :id id]})
+
+
+(defn cleanup-progress-q [id]
+  {:delete-from :uploading_progress
+   :where       [:= :id id]})
 
 
 (defn book->db [{:keys [filename text]}]
@@ -61,16 +88,40 @@
        nlp/text))
 
 
-(defn lemma-frequencies [text]
-  (let [xf (comp
-             (map nlp)
-             (map nlp/tokens)
-             (mapcat nlp/recur-datafy)
-             (map :lemma)
-             (filter word-exists?)
-             (map str/lower-case))]
-    (->> (remove-explicit-line-breaks text)
-         (split-sentences)
+(defonce progress-timer (atom {}))
+
+(defn save-progress [{:keys [progress-id current total]}]
+  (let [last-write (get @progress-timer progress-id)
+        second-ago (t/<< (t/now) (t/of-seconds 1))]
+    (when (or (nil? last-write)
+              (t/< last-write second-ago))
+      (let [percent (int (Math/floor (* 100 (/ current total))))]
+        (db/execute db/conn (update-progress-q progress-id percent))
+        (swap! progress-timer assoc progress-id (t/now))))))
+
+
+(defn cleanup-progress [progress-id]
+  (swap! progress-timer dissoc progress-id)
+  (db/execute db/conn (cleanup-progress-q progress-id)))
+
+
+(defn lemma-frequencies [{:keys [text progress-id]}]
+  (let [sentenses (->> (remove-explicit-line-breaks text)
+                       (split-sentences))
+        xf        (comp
+                    ;; not cool to have side effect here, but it's so easy and tempting... so why not
+                    (map-indexed (fn [i s]
+                                   (save-progress {:progress-id progress-id
+                                                   :current     i
+                                                   :total       (count sentenses)})
+                                   s))
+                    (map nlp)
+                    (map nlp/tokens)
+                    (mapcat nlp/recur-datafy)
+                    (map :lemma)
+                    (filter word-exists?)
+                    (map str/lower-case))]
+    (->> sentenses
          (transduce xf conj)
          frequencies
          (sort-by second >))))
@@ -92,17 +143,31 @@
 ;; add book api
 
 
+(defn process-book [progress-id book]
+  (db/execute db/conn (insert-book-q book))
+
+  (let [lemmas    (lemma-frequencies {:progress-id progress-id
+                                      :text        (:text book)})
+        lemmas-db (lemmas->db lemmas (:id book))]
+    (db/execute db/conn (insert-lemmas-q lemmas-db))
+    (cleanup-progress progress-id)))
+
+
 (defn handler [req]
-  (try
-    (let [file         (-> req :params :file)
-          book         (parse-book file)
-          book-db      (book->db book)
-          lemmas-count (lemma-frequencies (:text book-db))
-          lemmas-db    (lemmas->db lemmas-count (:id book-db))]
-      (db/execute db/conn (insert-book-q book-db))
-      (db/execute db/conn (insert-lemmas-q lemmas-db))
-      {:status  301
-       :headers {"Location" "/"}})
-    (catch Exception e
-      {:status  301
-       :headers {"Location" "/?message=book-duplicate"}})))
+  (b/cond
+    :let [file    (-> req :params :file)
+          book    (parse-book file)
+          book-db (book->db book)
+
+          book-exists? (seq (db/one db/conn (book-q (:id book-db))))]
+
+    book-exists?
+    {:status  301
+     :headers {"Location" "/?message=book-duplicate"}}
+
+    :let [progress-id (:id (db/one db/conn (init-progress-q)))]
+
+    :do (future (process-book progress-id book-db))
+
+    {:status 200
+     :body   (html (fragments/progress-bar progress-id 100))}))

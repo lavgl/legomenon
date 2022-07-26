@@ -21,8 +21,7 @@
                       (hiccup.page/include-js
                        "/public/js/htmx.js"
                        "/public/js/bootstrap.bundle.min.js"
-                       "/public/js/_hyperscript_web.min.js"
-                       "/public/js/swipe.js")
+                       "/public/js/_hyperscript_web.min.js")
                       [:script
                        "
 htmx.onLoad(element => {
@@ -122,3 +121,17 @@ htmx.onLoad(element => {
       "M"]
      [:button.btn.btn-outline-info
       "╳"]]]])
+
+
+(defn progress-bar [id current]
+  [:div.progress-wrapper
+   {:hx-target  "this"
+    :hx-get     (format "/api/progress/%s/" id)
+    :hx-trigger "load delay:1s"
+    :hx-swap    "outerHTML"}
+   [:div.progress {:style "height: 20px;"}
+    [:div#pb.progress-bar.progress-bar-striped.progress-bar-animated
+     {:aria-valuenow current
+      :aria-valuemin "0"
+      :aria-valuemax "100"
+      :style         (format "width: %s%%;" current)}]]])
