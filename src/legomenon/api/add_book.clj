@@ -73,6 +73,14 @@
               set))
 
 
+(def ^:dynamic *on-sentence-processed-cb* nil)
+
+
+(defmacro with-on-sentence-processed-cb [cb & body]
+  `(binding [*on-sentence-processed-cb* ~cb]
+     ~@body))
+
+
 (defn word-exists? [s]
   (contains? words s))
 
@@ -90,7 +98,7 @@
 
 (defonce progress-timer (atom {}))
 
-(defn save-progress [{:keys [progress-id current total]}]
+(defn save-progress! [{:keys [progress-id current total]}]
   (let [last-write (get @progress-timer progress-id)
         second-ago (t/<< (t/now) (t/of-seconds 1))]
     (when (or (nil? last-write)
@@ -105,20 +113,21 @@
   (db/execute db/conn (cleanup-progress-q progress-id)))
 
 
+;; TODO: remove progress-id from args?
 (defn lemma-frequencies [{:keys [text progress-id]}]
   (let [sentenses (->> (remove-explicit-line-breaks text)
                        (split-sentences))
         xf        (comp
-                    ;; not cool to have side effect here, but it's so easy and tempting... so why not
                     (map-indexed (fn [i s]
-                                   (save-progress {:progress-id progress-id
-                                                   :current     i
-                                                   :total       (count sentenses)})
+                                   (when *on-sentence-processed-cb*
+                                     (*on-sentence-processed-cb*
+                                       {:progress-id progress-id
+                                        :current     i
+                                        :total       (count sentenses)}))
                                    s))
                     (map nlp)
-                    (map nlp/tokens)
-                    (mapcat nlp/recur-datafy)
-                    (map :lemma)
+                    (mapcat nlp/tokens)
+                    (map nlp/lemma)
                     (filter word-exists?)
                     (map str/lower-case))]
     (->> sentenses
@@ -143,7 +152,7 @@
 ;; add book api
 
 
-(defn process-book [progress-id book]
+(defn process-book! [progress-id book]
   (db/execute db/conn (insert-book-q book))
 
   (let [lemmas    (lemma-frequencies {:progress-id progress-id
@@ -167,7 +176,10 @@
 
     :let [progress-id (:id (db/one db/conn (init-progress-q)))]
 
-    :do (future (process-book progress-id book-db))
+    :do (future
+          (with-on-sentence-processed-cb
+            save-progress!
+            (process-book! progress-id book-db)))
 
     {:status 200
      :body   (html (fragments/progress-bar progress-id 100))}))
