@@ -9,6 +9,7 @@ create table if not exists books (
   deleted_at integer
 );
 
+--;;
 
 create table if not exists lemma_count (
   id integer primary key,
@@ -17,6 +18,7 @@ create table if not exists lemma_count (
   count integer not null
 );
 
+--;;
 
 create table if not exists my_words (
   word text primary key,
