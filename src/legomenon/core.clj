@@ -12,7 +12,7 @@
 
             [legomenon.api.add-book :as add-book]
             [legomenon.api.words-operations :as words-op]
-            [legomenon.api.uploading-progress :as progress]
+            [legomenon.uploading-status.api :as us.api]
             [legomenon.pages.books-list :as books-list]
             [legomenon.pages.words-list :as words-list]
             [legomenon.pages.book-text :as book-text]
@@ -47,7 +47,7 @@
                 ["/api/books/:id/" {:delete {:handler book-settings/delete-book-handler}}]
                 ["/api/books/:id/rename/" {:put {:handler book-settings/rename-book-handler}}]
                 ["/api/words/op/" {:post {:handler words-op/handler}}]
-                ["/api/progress/:id/" {:get {:handler progress/handler}}]
+                ["/api/uploading/:id/status/" {:get {:handler us.api/handler}}]
 
                 ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes

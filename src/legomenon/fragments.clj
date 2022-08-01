@@ -1,6 +1,9 @@
 (ns legomenon.fragments
   (:require [clojure.string :as str]
-            [hiccup.page :as hiccup.page]))
+            [hiccup.page :as hiccup.page]
+            [hiccup.core :as html]
+
+            [legomenon.common.uploading-status :as common.us]))
 
 
 (defn page [header & content]
@@ -49,7 +52,6 @@ htmx.onLoad(element => {
                             (:book-dict :book-text)
                             [:a.nav-link {:href (format "/books/%s/settings/" book-id)} "Settings"]
                             nil)]
-    (println "page" page)
     [:nav.navbar.navbar-dark.navbar-expand-lg
      [:div.container-fluid
       back-btn
@@ -129,17 +131,3 @@ htmx.onLoad(element => {
                                     :hx-target "closest tr"
                                     :hx-swap   "outerHTML"}
       "╳"]]]])
-
-
-(defn progress-bar [id current]
-  [:div.progress-wrapper
-   {:hx-target  "this"
-    :hx-get     (format "/api/progress/%s/" id)
-    :hx-trigger "load delay:1s"
-    :hx-swap    "outerHTML"}
-   [:div.progress {:style "height: 20px;"}
-    [:div#pb.progress-bar.progress-bar-striped.progress-bar-animated
-     {:aria-valuenow current
-      :aria-valuemin "0"
-      :aria-valuemax "100"
-      :style         (format "width: %s%%;" current)}]]])
