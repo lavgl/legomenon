@@ -1,9 +1,6 @@
 (ns legomenon.fragments
   (:require [clojure.string :as str]
-            [hiccup.page :as hiccup.page]
-            [hiccup.core :as html]
-
-            [legomenon.common.uploading-status :as common.us]))
+            [hiccup.page :as hiccup.page]))
 
 
 (defn page [header & content]
