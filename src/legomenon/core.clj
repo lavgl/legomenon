@@ -13,10 +13,10 @@
             [legomenon.api.add-book :as add-book]
             [legomenon.api.words-operations :as words-op]
             [legomenon.uploading-status.api :as us.api]
-            [legomenon.pages.books-list :as books-list]
             [legomenon.pages.words-list :as words-list]
             [legomenon.pages.book-text :as book-text]
             [legomenon.pages.book-settings :as book-settings]
+            [legomenon.pages.main-page :as main]
 
             [legomenon.config]
             [legomenon.db]))
@@ -32,7 +32,7 @@
 
 (defn make-app []
   ;; NOTE: :page is used for navbar building
-  (let [routes [["/" {:get  {:handler books-list/page}
+  (let [routes [["/" {:get  {:handler main/page}
                       :page :books-list}]
                 ["/books/:id/" {:get {:handler words-list/page
                                       :page    :book-dict}}]
