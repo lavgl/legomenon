@@ -12,11 +12,14 @@
 
             [legomenon.api.add-book :as add-book]
             [legomenon.api.words-operations :as words-op]
+            [legomenon.books-aggregations.api :as aggs.api]
             [legomenon.uploading-status.api :as us.api]
             [legomenon.pages.words-list :as words-list]
             [legomenon.pages.book-text :as book-text]
             [legomenon.pages.book-settings :as book-settings]
             [legomenon.pages.main-page :as main]
+            [legomenon.pages.new-book-aggregation :as new-agg]
+            [legomenon.pages.book-aggregation :as agg]
 
             [legomenon.config]
             [legomenon.db]))
@@ -40,6 +43,10 @@
                                            :page    :book-text}}]
                 ["/books/:id/settings/" {:get {:handler book-settings/page
                                                :page    :book-settings}}]
+                ["/aggs/new/" {:handler new-agg/page
+                               :page    :new-agg}]
+                ["/aggs/:id/" {:handler agg/page
+                               :page    :agg}]
 
                 ["/fragments/op-row/" {:get {:handler words-op/render-op-row}}]
 
@@ -48,6 +55,7 @@
                 ["/api/books/:id/rename/" {:put {:handler book-settings/rename-book-handler}}]
                 ["/api/words/op/" {:post {:handler words-op/handler}}]
                 ["/api/uploading/:id/status/" {:get {:handler us.api/handler}}]
+                ["/api/aggs/add/" {:post {:handler aggs.api/handler}}]
 
                 ["/public/*" (ring/create-resource-handler)]]
         default (ring/routes
