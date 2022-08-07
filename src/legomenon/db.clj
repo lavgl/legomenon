@@ -14,6 +14,7 @@
 (def call sql/call)
 (def fmt sql/format)
 
+
 (defn- insert-or-*-into-formatter [clause table]
   [(str (sql/sql-kw clause) " " (sql/format-entity table))])
 
@@ -76,3 +77,12 @@
 (defmacro with-tx [tx-bindings & body]
   `(jdbc/with-db-transaction ~tx-bindings
      ~@body))
+
+
+(defn explain-query-plan [q]
+  (let [[q-str & args] (query->args q)
+        q              (format "explain query plan %s" q-str)
+        args           (apply vector q args)
+        result         (jdbc/query conn args)]
+    (->> result
+         (map :detail))))
