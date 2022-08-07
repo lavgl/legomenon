@@ -14,6 +14,3 @@
    [:div.col-sm-9
     [:h1 title]]
    [:div.col]])
-
-
-

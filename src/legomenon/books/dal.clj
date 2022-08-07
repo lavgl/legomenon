@@ -12,5 +12,5 @@
    :order-by [[[:coalesce :used_at :created_at] :desc]]})
 
 
-(defn list []
+(defn books-list []
   (db/q db/conn (books-list-q)))

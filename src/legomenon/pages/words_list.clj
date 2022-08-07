@@ -8,7 +8,6 @@
             [legomenon.words.dal :as words.dal]))
 
 
-
 (defn page [req]
   (let [book-id                        (-> req :path-params :id)
         {:keys [title is_book_exists]} (db/one db/conn (book/title-q book-id))]

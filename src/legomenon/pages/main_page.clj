@@ -17,8 +17,10 @@
 
 
 (defn books-list []
-  (let [books (books.dal/list)]
-    [:div {} (map books.views/render-book books)]))
+  (let [books (books.dal/books-list)]
+    [:div
+     [:h4 "My books:"]
+     [:div {} (map books.views/render-book books)]]))
 
 
 (defn page [req]
