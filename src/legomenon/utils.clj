@@ -1,5 +1,6 @@
 (ns legomenon.utils
-  (:import [java.security MessageDigest])
+  (:import [java.security MessageDigest]
+           [java.util UUID])
   (:require [clojure.string :as str]))
 
 
@@ -10,6 +11,10 @@
   (let [algorithm (MessageDigest/getInstance "MD5")
         raw       (.digest algorithm (.getBytes s))]
     (format "%032x" (BigInteger. 1 raw))))
+
+
+(defn uuid []
+  (java.util.UUID/randomUUID))
 
 
 ;; ================================================
