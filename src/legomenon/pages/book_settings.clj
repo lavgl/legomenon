@@ -27,7 +27,7 @@
 
 (defn page [req]
   (let [book-id                        (-> req :path-params :id)
-        {:keys [title is_book_exists]} (db/one db/conn (book/title-q book-id))]
+        {:keys [title is_book_exists]} (db/one (book/title-q book-id))]
     (if (pos? is_book_exists)
       {:status 200
        :body   (fragments/page
@@ -49,10 +49,10 @@
 (defn rename-book-handler [req]
   (let [new-title                (-> req :params :title str/trim not-empty)
         book-id                  (-> req :path-params :id)
-        {:keys [is_book_exists]} (db/one db/conn (book/title-q book-id))]
+        {:keys [is_book_exists]} (db/one (book/title-q book-id))]
     (if (and is_book_exists new-title)
       (do
-        (db/execute db/conn (update-book-title-q book-id new-title))
+        (db/q (update-book-title-q book-id new-title))
         {:status  200
          :headers {"HX-Refresh" true}})
       {:status 400
@@ -70,14 +70,14 @@
 
 
 (defn delete-book-db! [book-id]
-  (db/with-tx [tx db/conn]
-    (db/execute tx (delete-book-words-q book-id))
-    (db/execute tx (delete-book-q book-id))))
+  (db/tx
+    (db/q (delete-book-words-q book-id))
+    (db/q (delete-book-q book-id))))
 
 
 (defn delete-book-handler [req]
   (let [book-id                  (-> req :path-params :id)
-        {:keys [is_book_exists]} (db/one db/conn (book/title-q book-id))]
+        {:keys [is_book_exists]} (db/one (book/title-q book-id))]
     (if is_book_exists
       (do
         (delete-book-db! book-id)

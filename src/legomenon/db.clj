@@ -1,6 +1,7 @@
 (ns legomenon.db
   (:require [clojure.tools.logging :as log]
-            [clojure.java.jdbc :as jdbc]
+            [next.jdbc :as jdbc]
+            [next.jdbc.result-set :as jdbc-rs]
             [mount.core :as mount]
             [honey.sql :as sql]
             [ragtime.repl]
@@ -13,6 +14,9 @@
 
 (def call sql/call)
 (def fmt sql/format)
+
+
+(def ^:dynamic *current-tx* nil)
 
 
 (defn- insert-or-*-into-formatter [clause table]
@@ -38,51 +42,46 @@
    :reporter   ragtime.reporter/print})
 
 
+
 (mount/defstate conn
-  :start (let [subname (config/db-path)
-               db-spec {:classname   "org.sqlite.JDBC"
-                        :subprotocol "sqlite"
-                        :subname     subname}]
+  :start (let [path    (config/db-path)
+               db-spec {:dbtype "sqlite"
+                        :dbname path}]
            (doto (ragtime-config db-spec)
              (ragtime.repl/migrate))
-           (log/infof "init: %s" subname)
-           db-spec))
+           (log/infof "init: %s" path)
+           (jdbc/get-datasource db-spec)))
 
 
-(defn- query->args [query]
-  (cond
-    (map? query)    (sql/format query)
-    (string? query) [query]
-    :else           query))
+(defn query->args [query]
+  (if (string? query)
+    [query]
+    (sql/format query)))
 
 
-(defn q [db query]
-  (jdbc/query db (query->args query)))
+(defn q [query]
+  (jdbc/execute! (or *current-tx* conn) (query->args query)
+    {:builder-fn jdbc-rs/as-unqualified-lower-maps}))
 
 
-(defn one [db query]
-  (first (q db query)))
+(defn one [query]
+  (jdbc/execute-one! (or *current-tx* conn) (query->args query)
+    {:builder-fn jdbc-rs/as-unqualified-lower-maps}))
 
 
-(defn execute [db query]
-  (jdbc/execute! db (query->args query)))
-
-
-(defn exists? [subq]
-  (let [q {:select [1]
-           :where  [:exists subq]}]
-    (some? (one conn q))))
-
-
-(defmacro with-tx [tx-bindings & body]
-  `(jdbc/with-db-transaction ~tx-bindings
-     ~@body))
+(defmacro tx [& body]
+  `(if *current-tx*
+     (do ~@body)
+     (let [r# (jdbc/with-transaction [tx# conn]
+                (binding [*current-tx* tx#]
+                  ~@body))]
+       r#)))
 
 
 (defn explain-query-plan [q]
   (let [[q-str & args] (query->args q)
         q              (format "explain query plan %s" q-str)
         args           (apply vector q args)
-        result         (jdbc/query conn args)]
+        result         (jdbc/execute! conn args)]
     (->> result
          (map :detail))))

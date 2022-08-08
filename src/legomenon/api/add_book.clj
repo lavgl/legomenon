@@ -145,7 +145,7 @@
 (defn process-book! [book]
   (let [lemmas    (lemma-frequencies (:text book))
         lemmas-db (lemmas->db lemmas (:id book))]
-    (db/execute db/conn (insert-lemmas-q lemmas-db))))
+    (db/q (insert-lemmas-q lemmas-db))))
 
 
 (defn process-book-task [{:keys [file status-id]}]
@@ -154,12 +154,12 @@
           book (book->db book)
 
           ;; TODO: don't pass db/conn as `q`/`one` arguments
-          book-exists? (seq (db/one db/conn (book-q (:id book))))]
+          book-exists? (seq (db/one (book-q (:id book))))]
       (if book-exists?
         (us.dal/update! status-id {:state      us.vars/STATE-ERROR
                                    :state_info {:error_code 1}})
         (do
-          (db/execute db/conn (insert-book-q book))
+          (db/q (insert-book-q book))
           (us.dal/update! status-id {:state      us.vars/STATE-STEP-2
                                      ;; NOTE: :current_percent is 2 just to not make it empty,
                                      ;; so progress bar is visually understandable at that moment
@@ -168,7 +168,7 @@
           (binding [*on-sentence-processed-cb* #(save-progress! status-id %)]
             (process-book! book)
             (cleanup-progress status-id))
-          (db/execute db/conn (mark-book-upload-finished-at (:id book)))
+          (db/q (mark-book-upload-finished-at (:id book)))
           (us.dal/update! status-id {:state      us.vars/STATE-DONE
                                      :state_info nil}))))
     (catch Exception e
@@ -179,7 +179,7 @@
 (defn handler [req]
   (let [file      (-> req :params :file)
         filename  (:filename file)
-        status-id (:id (db/one db/conn (init-status-q filename)))]
+        status-id (:id (db/one (init-status-q filename)))]
 
     (future (process-book-task {:status-id status-id
                                 :file      file}))

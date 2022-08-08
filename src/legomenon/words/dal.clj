@@ -25,4 +25,4 @@
 
 
 (defn words-list-by-book-id [book-id]
-  (db/q db/conn (book-words-q book-id)))
+  (db/q (book-words-q book-id)))

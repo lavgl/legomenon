@@ -10,7 +10,7 @@
 
 (defn page [req]
   (let [book-id                        (-> req :path-params :id)
-        {:keys [title is_book_exists]} (db/one db/conn (book/title-q book-id))]
+        {:keys [title is_book_exists]} (db/one (book/title-q book-id))]
     (if (pos? is_book_exists)
       {:status 200
        :body   (html (fragments/page

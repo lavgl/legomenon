@@ -40,40 +40,40 @@
         word-id    (-> req :params :id)
         keyup?     (= event-type "keyup")
         swipe?     (= event-type "swipe")
-        word       (db/one db/conn (word-q word-id))]
+        word       (db/one (word-q word-id))]
     (cond
       (and keyup? (some? word) (= key "k"))
       (do
-        (db/execute db/conn (add-word-to-list-q :known (:lemma word)))
-        (db/execute db/conn (update-book-used-at-q (:book_id word)))
+        (db/q (add-word-to-list-q :known (:lemma word)))
+        (db/q (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fragments/render-known-row word))})
 
       (and keyup? (some? word) (= key "t"))
       (do
-        (db/execute db/conn (add-word-to-list-q :trash (:lemma word)))
-        (db/execute db/conn (update-book-used-at-q (:book_id word)))
+        (db/q (add-word-to-list-q :trash (:lemma word)))
+        (db/q (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fragments/render-trash-row word))})
 
       (and keyup? (some? word) (= key "m"))
       (do
-        (db/execute db/conn (add-word-to-list-q :memo (:lemma word)))
-        (db/execute db/conn (update-book-used-at-q (:book_id word)))
+        (db/q (add-word-to-list-q :memo (:lemma word)))
+        (db/q (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fragments/render-memo-row word))})
 
       (and keyup? (some? word) (= key "u"))
       (do
-        (db/execute db/conn (remove-word-from-lists-q (:lemma word)))
-        (db/execute db/conn (update-book-used-at-q (:book_id word)))
+        (db/q (remove-word-from-lists-q (:lemma word)))
+        (db/q (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fragments/render-plain-row word))})
 
       (and keyup? (some? word) (= key "p"))
       (do
-        (db/execute db/conn (add-word-to-list-q :postponed (:lemma word)))
-        (db/execute db/conn (update-book-used-at-q (:book_id word)))
+        (db/q (add-word-to-list-q :postponed (:lemma word)))
+        (db/q (update-book-used-at-q (:book_id word)))
         {:status 200
          :body   (html (fragments/render-postponed-row word))})
 
@@ -87,6 +87,6 @@
 
 (defn render-op-row [req]
   (let [word-id (-> req :params :word-id)
-        word    (db/one db/conn (word-q word-id))]
+        word    (db/q (word-q word-id))]
     {:status 200
      :body   (html (fragments/render-op-row word))}))

@@ -10,7 +10,7 @@
 
 
 (defn agg-by-id [id]
-  (db/one db/conn (agg-by-id-q id)))
+  (db/one (agg-by-id-q id)))
 
 
 (defn aggs-list-q []
@@ -20,7 +20,7 @@
 
 
 (defn aggs-list []
-  (db/q db/conn (aggs-list-q)))
+  (db/q (aggs-list-q)))
 
 
 (defn insert-agg-q [agg-name]
@@ -59,8 +59,8 @@
 
 
 (defn create-agg [agg-name books-ids]
-  (db/with-tx [tx db/conn]
-    (let [words        (db/q db/conn (aggs-words-q books-ids))
-          {:keys [id]} (db/one tx (insert-agg-q agg-name))
+  (db/tx
+    (let [words        (db/q (aggs-words-q books-ids))
+          {:keys [id]} (db/one (insert-agg-q agg-name))
           words-db     (words->db words id)]
-      (db/execute tx (insert-words-q words-db)))))
+      (db/q (insert-words-q words-db)))))

@@ -1,5 +1,4 @@
 (ns legomenon.books.dal
-  (:refer-clojure :exclude [list])
   (:require [legomenon.db :as db]))
 
 
@@ -13,4 +12,4 @@
 
 
 (defn books-list []
-  (db/q db/conn (books-list-q)))
+  (db/q (books-list-q)))
