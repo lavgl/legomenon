@@ -9,21 +9,21 @@
      [:meta {:charset "UTF-8"}]
      [:meta {:name    "viewport"
              :content "width=device-width, initial-scale=1"}]
-                      (hiccup.page/include-css
-                       "/public/css/bootstrap.min.css"
-                       "/public/css/main.css")]
-                     [:body
-                      (when header
-                        [:div.header-divider
-                         header])
-                      [:div.container
-                       content]
-                      (hiccup.page/include-js
-                       "/public/js/htmx.js"
-                       "/public/js/bootstrap.bundle.min.js"
-                       "/public/js/_hyperscript_web.min.js")
-                      [:script
-                       "
+     (hiccup.page/include-css
+       "/public/css/bootstrap.min.css"
+       "/public/css/main.css")]
+    [:body
+     (when header
+       [:div.header-divider
+        header])
+     [:div.container
+      content]
+     (hiccup.page/include-js
+       "/public/js/htmx.js"
+       "/public/js/bootstrap.bundle.min.js"
+       "/public/js/_hyperscript_web.min.js")
+     [:script
+      "
 htmx.onLoad(element => {
   if (element.tagName == 'TR' && element.nextSibling && element.nextSibling.tagName == 'TR') {
     element.nextSibling.focus();

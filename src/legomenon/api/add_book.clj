@@ -150,11 +150,10 @@
 
 (defn process-book-task [{:keys [file status-id]}]
   (try
-    (let [book (parse-book file)
-          book (book->db book)
-
-          ;; TODO: don't pass db/conn as `q`/`one` arguments
+    (let [book         (parse-book file)
+          book         (book->db book)
           book-exists? (seq (db/one (book-q (:id book))))]
+
       (if book-exists?
         (us.dal/update! status-id {:state      us.vars/STATE-ERROR
                                    :state_info {:error_code 1}})
