@@ -1,5 +1,6 @@
 (ns legomenon.words.dal
-  (:require [legomenon.db :as db]))
+  (:require [legomenon.db :as db]
+            [legomenon.top-words :as top-words]))
 
 
 (def words-sorting-subq
@@ -24,5 +25,7 @@
                [:count :desc]]})
 
 
-(defn words-list-by-book-id [book-id]
-  (db/q (book-words-q book-id)))
+(defn words-list-by-book-id [book-id show]
+  (cond->> (db/q (book-words-q book-id))
+    (= show "top-4k")  (filter #(top-words/in-4k? (:lemma %)))
+    (= show "top-10k") (filter #(top-words/in-10k? (:lemma %)))))

@@ -24,11 +24,8 @@
 
 
 (defn words-table [words]
-[:div.row
-     [:div.col]
-     [:div.col-sm-9
-      [:table
-       {:_ "
+[:table
+ {:_ "
 init
   set :dx_to_hightlight to 50
   set :dx_to_be_swiped to 50
@@ -77,5 +74,4 @@ on touchend
 "}
        [:thead
         [:tr.dict-word [:th "Word"] [:th "Count"] [:th "Occurrence rate"]]]
-       [:tbody (render-table-body words) ]]]
-     [:div.col]])
+       [:tbody (render-table-body words)]])

@@ -49,3 +49,11 @@ body {
 .settings-btn {
     min-width: 8em;
 }
+
+.top-words-filter {
+    margin-right: 10px;
+}
+
+.top-words-filter-panel {
+    margin-bottom: 10px;
+}
