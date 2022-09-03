@@ -16,11 +16,6 @@
        (map parse-line)))
 
 
-(time
-  (->> (words-seq)
-       (set)))
-
-
 (defn build-index []
   (let [words  (words-seq)
         top4k  (->> words
