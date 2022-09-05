@@ -87,6 +87,6 @@
 
 (defn render-op-row [req]
   (let [word-id (-> req :params :word-id)
-        word    (db/q (word-q word-id))]
+        word    (db/one (word-q word-id))]
     {:status 200
      :body   (html (fragments/render-op-row word))}))
