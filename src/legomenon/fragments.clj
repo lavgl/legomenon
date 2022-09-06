@@ -9,19 +9,33 @@
      [:meta {:charset "UTF-8"}]
      [:meta {:name    "viewport"
              :content "width=device-width, initial-scale=1"}]
-     (hiccup.page/include-css
-       "/public/css/bootstrap.min.css"
-       "/public/css/main.css")]
+
+     [:link {:href        "https://unpkg.com/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+             :rel         "stylesheet"
+             :type        "text/css"
+             :crossorigin "anonymous"}]
+     (hiccup.page/include-css "/public/css/main.css")]
     [:body
      (when header
        [:div.header-divider
         header])
      [:div.container
       content]
-     (hiccup.page/include-js
-       "/public/js/htmx.js"
-       "/public/js/bootstrap.bundle.min.js"
-       "/public/js/_hyperscript_web.min.js")
+     [:sc]
+
+     ;; htmx
+     [:script {:src         "https://unpkg.com/htmx.org@1.8.0"
+               :integrity   "sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc"
+               :crossorigin "anonymous"}]
+
+     ;; bootstrap
+     [:script {:src         "https://unpkg.com/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+               :integrity   "sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+               :crossorigin "anonymous"}]
+
+     ;; hyperscript
+     [:script {:src "https://unpkg.com/hyperscript.org@0.9.7"}]
+
      [:script
       "
 htmx.onLoad(element => {
