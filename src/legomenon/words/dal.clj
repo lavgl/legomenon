@@ -5,9 +5,9 @@
 
 (def words-sorting-subq
   [:case
-   [:= :list "memo"]      4
+   [:= :list "postponed"] 4
    [:= :list nil]         3
-   [:= :list "postponed"] 2
+   [:= :list "memo"]      2
    [:= :list "known"]     1
    [:= :list "trash"]     0])
 
