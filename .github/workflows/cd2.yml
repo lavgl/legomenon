@@ -1,0 +1,26 @@
+name: Testing deploy as it should be done :)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3.6.0
+        with:
+          distibution: 'temurin'
+          java-version: '19'
+
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@10.0
+        with:
+          cli: 1.10.1.693
+
+      - name: Test clojure execution
+        run: clojure -e "(+ 1 1)"
