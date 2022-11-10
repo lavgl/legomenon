@@ -1,14 +1,14 @@
-name: CI/CD workflow
-on: [push]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          script: cd ~/legomenon && bin/deploy.sh
+# name: CI/CD workflow
+# on: [push]
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: deploy
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: ${{ secrets.USERNAME }}
+#           key: ${{ secrets.KEY }}
+#           script: cd ~/legomenon && bin/deploy.sh
 

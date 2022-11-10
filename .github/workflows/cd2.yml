@@ -20,7 +20,7 @@ jobs:
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@10.0
         with:
-          cli: 1.10.1.693
+          cli: 1.11.1.1165
 
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -29,17 +29,17 @@ jobs:
             ~/.m2/repository
           key: ${{ hashFiles('deps.edn') }}
 
-      # - name: Test clojure execution
-      #   run: clojure -e "(+ 1 1)"
+      - name: Test clojure version
+        run: clojure --version
 
-      - name: Echo current directory
-        run: pwd
+      # - name: Echo current directory
+      #   run: pwd
 
-      - name: Display current directory contnet
-        run: ls -al
+      # - name: Display current directory contnet
+      #   run: ls -al
 
-      # - name: Build application
-      #   run: clojure -T:build uber
+      - name: Build application
+        run: clojure -T:build uber
 
       # - name: Check build :)
       #   run: ls target
