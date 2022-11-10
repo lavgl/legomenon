@@ -38,6 +38,9 @@ jobs:
       - name: Check build :)
         run: ls target
 
+      - name: Check commit
+        run: git rev-parse --verify HEAD 
+
       # - name: Copy JAR to the server
 
 
