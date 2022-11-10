@@ -41,7 +41,11 @@ jobs:
       - name: Check commit
         run: git rev-parse --verify HEAD 
 
-      # - name: Copy JAR to the server
-
-
-      # - name: Restart the app
+      - name: Copy JAR to the server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          source: "target/legomenon-*"
+          target: "test"
