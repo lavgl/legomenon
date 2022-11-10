@@ -29,14 +29,20 @@ jobs:
             ~/.m2/repository
           key: ${{ hashFiles('deps.edn') }}
 
-      - name: Test clojure execution
-        run: clojure -e "(+ 1 1)"
+      # - name: Test clojure execution
+      #   run: clojure -e "(+ 1 1)"
 
-      - name: Build application
-        run: clojure -T:build uber
+      - name: Echo current directory
+        run: pwd
 
-      - name: Check build :)
-        run: ls target
+      - name: Display current directory contnet
+        run: ls -al
+
+      # - name: Build application
+      #   run: clojure -T:build uber
+
+      # - name: Check build :)
+      #   run: ls target
 
       # - name: Copy JAR to the server
 
