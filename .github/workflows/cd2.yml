@@ -48,4 +48,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           source: "target/legomenon-*"
-          target: "test"
+          target: "dist"
+          strip_components: 1
