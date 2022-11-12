@@ -6,8 +6,8 @@
 
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
-(def version (b/git-process {:git-args "rev-parse --short HEAD"}))
-(def uber-file (format "target/legomenon-%s.jar" version))
+(def sha (b/git-process {:git-args "rev-parse --short HEAD"}))
+(def uber-file (format "target/legomenon-%s.jar" sha))
 
 
 (defn clean [_]

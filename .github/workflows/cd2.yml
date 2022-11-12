@@ -1,4 +1,4 @@
-name: Testing deploy as it should be done :)
+name: Deploy
 
 on:
   push:
@@ -33,14 +33,14 @@ jobs:
         run: clojure -T:build uber
 
       - name: Persist revision
-        run: git rev-parse --short HEAD > target/.rev
+        run: echo "rev=$(git rev-parse --short HEAD)" > target/rev
 
-      - name: Copy JAR to the server
+      - name: Copy target to the server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-          source: "target/legomenon-*,target/.rev"
+          source: "target/legomenon-*,target/rev"
           target: "dist"
           strip_components: 1
