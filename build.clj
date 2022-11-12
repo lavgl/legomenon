@@ -6,7 +6,7 @@
 
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
-(def version (format "0.0.%s" (b/git-count-revs nil)))
+(def version (b/git-process {:git-args "rev-parse --short HEAD"}))
 (def uber-file (format "target/legomenon-%s.jar" version))
 
 
@@ -16,10 +16,6 @@
 
 (defn uber [_]
   (clean nil)
-  (println "hash:" (b/git-process {:git-args "rev-parse --short HEAD"}))
-  (println "pwd" (b/process {:command-args ["pwd"]}))
-  (println "count-revs" (b/git-count-revs nil))
-  (println "project root" b/*project-root*)
   (b/copy-dir {:src-dirs   ["src" "resources"]
                ;; :ignores    (conj copy/default-ignores "dev.clj")
                :target-dir class-dir})
