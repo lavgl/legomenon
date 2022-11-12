@@ -16,6 +16,8 @@
 
 (defn uber [_]
   (clean nil)
+  (println "hash:" (b/git-process {:git-args "rev-parse --short HEAD"}))
+  (println "pwd" (b/process {:command-args ["pwd"]}))
   (b/copy-dir {:src-dirs   ["src" "resources"]
                ;; :ignores    (conj copy/default-ignores "dev.clj")
                :target-dir class-dir})
