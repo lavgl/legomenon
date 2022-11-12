@@ -18,6 +18,8 @@
   (clean nil)
   (println "hash:" (b/git-process {:git-args "rev-parse --short HEAD"}))
   (println "pwd" (b/process {:command-args ["pwd"]}))
+  (println "count-revs" (b/git-count-revs nil))
+  (println "project root" b/*project-root*)
   (b/copy-dir {:src-dirs   ["src" "resources"]
                ;; :ignores    (conj copy/default-ignores "dev.clj")
                :target-dir class-dir})
